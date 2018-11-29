@@ -20,6 +20,7 @@ package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 
@@ -28,11 +29,11 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class ReplicaRecoveryInfo extends Block {
+public class ReplicaRecoveryInfo extends SwappableBlock {
   private final ReplicaState originalState;
 
   public ReplicaRecoveryInfo(long blockId, long diskLen, long gs, ReplicaState rState) {
-    set(blockId, diskLen, gs);
+    super(blockId, diskLen, gs);
     originalState = rState;
   }
 

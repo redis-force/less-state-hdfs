@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.BlockType;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.util.LightWeightGSet;
@@ -39,7 +40,7 @@ import static org.apache.hadoop.hdfs.server.namenode.INodeId.INVALID_INODE_ID;
  * block group, are stored.
  */
 @InterfaceAudience.Private
-public abstract class BlockInfo extends Block
+public abstract class BlockInfo extends SwappableBlock
     implements LightWeightGSet.LinkedElement {
 
   public static final BlockInfo[] EMPTY_ARRAY = {};

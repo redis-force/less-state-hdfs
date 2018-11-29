@@ -35,7 +35,7 @@ public class ExtendedBlock {
   }
 
   public ExtendedBlock(final ExtendedBlock b) {
-    this(b.poolId, new Block(b.block));
+    this(b.poolId, new HdfsBlock(b.block));
   }
 
   public ExtendedBlock(final String poolId, final long blockId) {
@@ -50,7 +50,7 @@ public class ExtendedBlock {
   public ExtendedBlock(final String poolId, final long blkid, final long len,
       final long genstamp) {
     this.poolId = poolId != null ? poolId.intern() : null;
-    block = new Block(blkid, len, genstamp);
+    block = new HdfsBlock(blkid, len, genstamp);
   }
 
   public String getBlockPoolId() {

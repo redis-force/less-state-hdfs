@@ -18,6 +18,7 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.classification.InterfaceAudience;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.util.SequentialNumber;
 
@@ -54,7 +55,7 @@ public class SequentialBlockGroupIdGenerator extends SequentialNumber {
   public long nextValue() {
     skipTo((getCurrentValue() & ~BLOCK_GROUP_INDEX_MASK) + MAX_BLOCKS_IN_GROUP);
     // Make sure there's no conflict with existing random block IDs
-    final Block b = new Block(getCurrentValue());
+    final Block b = new SwappableBlock(getCurrentValue());
     while (hasValidBlockInRange(b)) {
       skipTo(getCurrentValue() + MAX_BLOCKS_IN_GROUP);
       b.setBlockId(getCurrentValue());

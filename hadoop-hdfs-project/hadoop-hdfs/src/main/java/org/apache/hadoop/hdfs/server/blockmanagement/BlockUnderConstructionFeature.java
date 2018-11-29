@@ -18,6 +18,7 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.BlockType;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
@@ -90,7 +91,7 @@ public class BlockUnderConstructionFeature {
         // when creating a new striped block we simply sequentially assign block
         // index to each storage
         Block replicaBlock = blockType == BlockType.STRIPED ?
-            new Block(block.getBlockId() + i, 0, block.getGenerationStamp()) :
+            new SwappableBlock(block.getBlockId() + i, 0, block.getGenerationStamp()) :
             block;
         replicas[offset++] = new ReplicaUnderConstruction(replicaBlock,
             targets[i], ReplicaState.RBW);
@@ -337,7 +338,7 @@ public class BlockUnderConstructionFeature {
     }
     sb.append("]}");
   }
-  
+
   public void appendUCPartsConcise(StringBuilder sb) {
     sb.append("replicas=");
     int i = 0;

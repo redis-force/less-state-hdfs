@@ -52,6 +52,7 @@ import org.apache.hadoop.hdfs.RemotePeerFactory;
 import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
 import org.apache.hadoop.hdfs.net.Peer;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfoWithStorage;
@@ -266,7 +267,7 @@ public class NamenodeFsck implements DataEncryptionKeyFactory {
 
     try {
       //get blockInfo
-      Block block = new Block(Block.getBlockId(blockId));
+      Block block = new SwappableBlock(Block.getBlockId(blockId));
       //find which file this block belongs to
       BlockInfo blockInfo = blockManager.getStoredBlock(block);
       if(blockInfo == null) {

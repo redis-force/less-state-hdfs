@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.PermissionStatus;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.DFSUtil;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockStoragePolicy;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
@@ -208,7 +209,7 @@ class FSDirWriteFileOp {
   static LocatedBlock makeLocatedBlock(FSNamesystem fsn, BlockInfo blk,
       DatanodeStorageInfo[] locs, long offset) throws IOException {
     LocatedBlock lBlk = BlockManager.newLocatedBlock(
-        fsn.getExtendedBlock(new Block(blk)), blk, locs, offset);
+        fsn.getExtendedBlock(new SwappableBlock(blk)), blk, locs, offset);
     fsn.getBlockManager().setBlockToken(lBlk,
         BlockTokenIdentifier.AccessMode.WRITE);
     return lBlk;

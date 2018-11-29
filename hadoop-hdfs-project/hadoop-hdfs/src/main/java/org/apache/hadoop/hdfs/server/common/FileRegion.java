@@ -22,6 +22,7 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 
@@ -42,7 +43,7 @@ public class FileRegion implements BlockAlias {
 
   public FileRegion(long blockId, Path path, long offset,
                     long length, long genStamp, byte[] nonce) {
-    this(new Block(blockId, length, genStamp),
+    this(new SwappableBlock(blockId, length, genStamp),
             new ProvidedStorageLocation(path, offset, length, nonce));
   }
 
