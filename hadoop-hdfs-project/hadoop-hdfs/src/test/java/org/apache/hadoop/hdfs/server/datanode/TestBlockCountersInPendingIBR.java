@@ -26,6 +26,7 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.client.BlockReportOptions;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
@@ -86,17 +87,17 @@ public class TestBlockCountersInPendingIBR {
     ReceivedDeletedBlockInfo rdbi = null;
     /* block at status of RECEIVING_BLOCK */
     rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5678, 512, 1000),  BlockStatus.RECEIVING_BLOCK, null);
+        new HdfsBlock(5678, 512, 1000),  BlockStatus.RECEIVING_BLOCK, null);
     actor.getIbrManager().addRDBI(rdbi, storage);
 
     /* block at status of RECEIVED_BLOCK */
     rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5679, 512, 1000),  BlockStatus.RECEIVED_BLOCK, null);
+        new HdfsBlock(5679, 512, 1000),  BlockStatus.RECEIVED_BLOCK, null);
     actor.getIbrManager().addRDBI(rdbi, storage);
 
     /* block at status of DELETED_BLOCK */
     rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5680, 512, 1000),  BlockStatus.DELETED_BLOCK, null);
+        new HdfsBlock(5680, 512, 1000),  BlockStatus.DELETED_BLOCK, null);
     actor.getIbrManager().addRDBI(rdbi, storage);
 
     /* verify counters before sending IBR */

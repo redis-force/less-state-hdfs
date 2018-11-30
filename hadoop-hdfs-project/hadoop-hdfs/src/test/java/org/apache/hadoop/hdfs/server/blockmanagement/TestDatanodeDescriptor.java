@@ -45,7 +45,7 @@ public class TestDatanodeDescriptor {
     DatanodeDescriptor dd = DFSTestUtil.getLocalDatanodeDescriptor();
     ArrayList<Block> blockList = new ArrayList<Block>(MAX_BLOCKS);
     for (int i=0; i<MAX_BLOCKS; i++) {
-      blockList.add(new Block(i, 0, GenerationStamp.LAST_RESERVED_STAMP));
+      blockList.add(new SwappableBlock(i, 0, GenerationStamp.LAST_RESERVED_STAMP));
     }
     dd.addBlocksToBeInvalidated(blockList);
     Block[] bc = dd.getInvalidateBlocks(MAX_LIMIT);
@@ -58,8 +58,8 @@ public class TestDatanodeDescriptor {
   public void testBlocksCounter() throws Exception {
     DatanodeDescriptor dd = BlockManagerTestUtil.getLocalDatanodeDescriptor(true);
     assertEquals(0, dd.numBlocks());
-    BlockInfo blk = new BlockInfoContiguous(new Block(1L), (short) 1);
-    BlockInfo blk1 = new BlockInfoContiguous(new Block(2L), (short) 2);
+    BlockInfo blk = new BlockInfoContiguous(new SwappableBlock(1L), (short) 1);
+    BlockInfo blk1 = new BlockInfoContiguous(new SwappableBlock(2L), (short) 2);
     DatanodeStorageInfo[] storages = dd.getStorageInfos();
     assertTrue(storages.length > 0);
     // add first block
