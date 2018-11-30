@@ -6,22 +6,16 @@ branches:
     - trying
     # Enable building pull requests.
     - master
-
 dist: xenial
 language: java
 sudo: false
-
 jdk:
-  - openjdk8
-
+  - oraclejdk8
 os:
   - linux
-
 cache:
  directories:
    - $HOME/.m2
-
 install: true
-
 script:
   - mvn package -Pdist -DskipTests=true -Dtar
