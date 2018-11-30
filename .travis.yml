@@ -6,7 +6,6 @@ branches:
     - trying
     # Enable building pull requests.
     - master
-dist: xenial
 language: java
 sudo: false
 jdk:
