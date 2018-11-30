@@ -135,7 +135,7 @@ public class TestComputeInvalidateWork {
     try {
       for (int i=0; i<nodes.length; i++) {
         for(int j=0; j<3*blockInvalidateLimit+1; j++) {
-          Block block = new Block(i*(blockInvalidateLimit+1)+j, 0,
+          Block block = new SwappableBlock(i*(blockInvalidateLimit+1)+j, 0,
               GenerationStamp.LAST_RESERVED_STAMP);
           bm.addToInvalidates(block, nodes[i]);
         }
@@ -159,7 +159,7 @@ public class TestComputeInvalidateWork {
       int nodeCount = ecPolicy.getNumDataUnits() + ecPolicy.getNumParityUnits();
       for (int i = 0; i < nodeCount; i++) {
         for(int j = 0; j < 3 * blockInvalidateLimit + 1; j++) {
-          Block blk = new Block(locatedStripedBlock.getBlock().getBlockId() +
+          Block blk = new SwappableBlock(locatedStripedBlock.getBlock().getBlockId() +
               (i * 10 + j), stripesPerBlock * cellSize,
               locatedStripedBlock.getBlock().getGenerationStamp());
           bm.addToInvalidates(blk, nodes[i]);
@@ -187,13 +187,13 @@ public class TestComputeInvalidateWork {
       for (int i = 0; i < nodeCount; i++) {
         for(int j = 0; j < 3 * blockInvalidateLimit + 1; j++) {
           if (random.nextBoolean()) {
-            Block stripedBlock = new Block(
+            Block stripedBlock = new SwappableBlock(
                 locatedStripedBlock.getBlock().getBlockId() + (i * 10 + j),
                 stripesPerBlock * cellSize,
                 locatedStripedBlock.getBlock().getGenerationStamp());
             bm.addToInvalidates(stripedBlock, nodes[i]);
           } else {
-            Block replica = new Block(i * (blockInvalidateLimit + 1) + j, 0,
+            Block replica = new SwappableBlock(i * (blockInvalidateLimit + 1) + j, 0,
                 GenerationStamp.LAST_RESERVED_STAMP);
             bm.addToInvalidates(replica, nodes[i]);
           }
@@ -221,9 +221,9 @@ public class TestComputeInvalidateWork {
       dnr = new DatanodeRegistration(UUID.randomUUID().toString(), dnr);
       cluster.stopDataNode(nodes[0].getXferAddr());
 
-      Block block = new Block(0, 0, GenerationStamp.LAST_RESERVED_STAMP);
+      Block block = new SwappableBlock(0, 0, GenerationStamp.LAST_RESERVED_STAMP);
       bm.addToInvalidates(block, nodes[0]);
-      Block stripedBlock = new Block(
+      Block stripedBlock = new SwappableBlock(
           locatedStripedBlock.getBlock().getBlockId() + 100,
           stripesPerBlock * cellSize,
           locatedStripedBlock.getBlock().getGenerationStamp());

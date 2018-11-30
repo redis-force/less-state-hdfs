@@ -51,6 +51,7 @@ import org.apache.hadoop.hdfs.protocol.AddErasureCodingPolicyResponse;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicyState;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoContiguous;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
@@ -496,7 +497,7 @@ public class TestFSEditLogLoader {
 
       // Add a striped block to the file
       BlockInfoStriped stripedBlk = new BlockInfoStriped(
-          new Block(blkId, blkNumBytes, timestamp), testECPolicy);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), testECPolicy);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(stripedBlk);
@@ -564,7 +565,7 @@ public class TestFSEditLogLoader {
       Path p = new Path(testFilePath);
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoStriped stripedBlk = new BlockInfoStriped(
-          new Block(blkId, blkNumBytes, timestamp), testECPolicy);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), testECPolicy);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(stripedBlk);
@@ -641,7 +642,7 @@ public class TestFSEditLogLoader {
       //after loading a addblock-editlog
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoContiguous cBlk = new BlockInfoContiguous(
-          new Block(blkId, blkNumBytes, timestamp), (short)3);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), (short)3);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(cBlk);
@@ -688,7 +689,7 @@ public class TestFSEditLogLoader {
 
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoContiguous cBlk = new BlockInfoContiguous(
-          new Block(blkId, blkNumBytes, timestamp), (short)3);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), (short)3);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(cBlk);

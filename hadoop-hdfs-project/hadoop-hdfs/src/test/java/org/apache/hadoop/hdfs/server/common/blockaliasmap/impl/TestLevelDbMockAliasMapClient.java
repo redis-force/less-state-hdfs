@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 import org.apache.hadoop.hdfs.server.aliasmap.InMemoryAliasMap;
 import org.apache.hadoop.hdfs.server.aliasmap.InMemoryLevelDBAliasMapServer;
@@ -78,7 +79,7 @@ public class TestLevelDbMockAliasMapClient {
 
   @Test
   public void readFailure() throws Exception {
-    Block block = new Block(42, 43, 44);
+    Block block = new HdfsBlock(42, 43, 44);
     doThrow(new IOException())
         .doThrow(new DBException())
         .when(aliasMapMock)
@@ -97,7 +98,7 @@ public class TestLevelDbMockAliasMapClient {
 
   @Test
   public void writeFailure() throws IOException {
-    Block block = new Block(42, 43, 44);
+    Block block = new HdfsBlock(42, 43, 44);
     byte[] nonce = new byte[0];
     Path path = new Path("koekoek");
     ProvidedStorageLocation providedStorageLocation =

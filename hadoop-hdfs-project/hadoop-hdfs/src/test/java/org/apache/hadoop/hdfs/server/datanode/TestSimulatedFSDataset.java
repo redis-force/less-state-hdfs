@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
@@ -298,8 +299,8 @@ public class TestSimulatedFSDataset {
     final SimulatedFSDataset fsdataset = getSimulatedFSDataset();
     int bytesAdded = addSomeBlocks(fsdataset);
     Block[] deleteBlocks = new Block[2];
-    deleteBlocks[0] = new Block(1, 0, 0);
-    deleteBlocks[1] = new Block(2, 0, 0);
+    deleteBlocks[0] = new HdfsBlock(1, 0, 0);
+    deleteBlocks[1] = new HdfsBlock(2, 0, 0);
     fsdataset.invalidate(bpid, deleteBlocks);
     checkInvalidBlock(new ExtendedBlock(bpid, deleteBlocks[0]));
     checkInvalidBlock(new ExtendedBlock(bpid, deleteBlocks[1]));
@@ -309,7 +310,7 @@ public class TestSimulatedFSDataset {
     
     // Now make sure the rest of the blocks are valid
     for (int i=3; i <= NUMBLOCKS; ++i) {
-      Block b = new Block(i, 0, 0);
+      Block b = new HdfsBlock(i, 0, 0);
       assertTrue(fsdataset.isValidBlock(new ExtendedBlock(bpid, b)));
     }
   }

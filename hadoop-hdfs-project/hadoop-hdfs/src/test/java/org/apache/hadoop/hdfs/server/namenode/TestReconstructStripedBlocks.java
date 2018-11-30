@@ -32,6 +32,7 @@ import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.hdfs.protocol.LocatedStripedBlock;
 import org.apache.hadoop.hdfs.protocol.SystemErasureCodingPolicies;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
@@ -147,7 +148,7 @@ public class TestReconstructStripedBlocks {
       for (; i < numOfBusy; i++) {
         DatanodeDescriptor busyNode = storageInfos[i].getDatanodeDescriptor();
         for (int j = 0; j < maxReplicationStreams + 1; j++) {
-          BlockManagerTestUtil.addBlockToBeReplicated(busyNode, new Block(j),
+          BlockManagerTestUtil.addBlockToBeReplicated(busyNode, new SwappableBlock(j),
               new DatanodeStorageInfo[]{storageInfos[0]});
         }
       }

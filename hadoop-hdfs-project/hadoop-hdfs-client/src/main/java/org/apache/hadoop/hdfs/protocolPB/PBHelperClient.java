@@ -64,6 +64,7 @@ import org.apache.hadoop.hdfs.inotify.Event;
 import org.apache.hadoop.hdfs.inotify.EventBatch;
 import org.apache.hadoop.hdfs.inotify.EventBatchList;
 import org.apache.hadoop.hdfs.protocol.AddErasureCodingPolicyResponse;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockChecksumOptions;
 import org.apache.hadoop.hdfs.protocol.BlockChecksumType;
@@ -2146,7 +2147,7 @@ public class PBHelperClient {
   }
 
   public static Block convert(BlockProto b) {
-    return new Block(b.getBlockId(), b.getNumBytes(), b.getGenStamp());
+    return new HdfsBlock(b.getBlockId(), b.getNumBytes(), b.getGenStamp());
   }
 
   public static BlockTypeProto convert(BlockType blockType) {

@@ -35,11 +35,11 @@ import com.google.common.base.Joiner;
 public class TestPendingDataNodeMessages {
   final PendingDataNodeMessages msgs = new PendingDataNodeMessages();
   
-  private final Block block1Gs1 = new Block(1, 0, 1);
-  private final Block block1Gs2 = new Block(1, 0, 2);
+  private final Block block1Gs1 = new SwappableBlock(1, 0, 1);
+  private final Block block1Gs2 = new SwappableBlock(1, 0, 2);
   private final Block block1Gs2DifferentInstance =
-    new Block(1, 0, 2);
-  private final Block block2Gs1 = new Block(2, 0, 1);
+    new SwappableBlock(1, 0, 2);
+  private final Block block2Gs1 = new SwappableBlock(2, 0, 1);
 
   @Test
   public void testQueues() {

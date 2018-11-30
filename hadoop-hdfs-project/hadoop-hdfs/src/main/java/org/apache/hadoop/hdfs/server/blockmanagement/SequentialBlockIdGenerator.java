@@ -19,6 +19,7 @@ package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.namenode.INodeId;
 import org.apache.hadoop.util.SequentialNumber;
 
@@ -47,7 +48,7 @@ public class SequentialBlockIdGenerator extends SequentialNumber {
 
   @Override // NumberGenerator
   public long nextValue() {
-    Block b = new Block(super.nextValue());
+    Block b = new SwappableBlock(super.nextValue());
 
     // There may be an occasional conflict with randomly generated
     // block IDs. Skip over the conflicts.

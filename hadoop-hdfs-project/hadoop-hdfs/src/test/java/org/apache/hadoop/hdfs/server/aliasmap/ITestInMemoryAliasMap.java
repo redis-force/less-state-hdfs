@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 import org.junit.After;
 import org.junit.Before;
@@ -65,7 +66,7 @@ public class ITestInMemoryAliasMap {
 
   @Test
   public void readNotFoundReturnsNothing() throws IOException {
-    Block block = new Block(42, 43, 44);
+    Block block = new HdfsBlock(42, 43, 44);
 
     Optional<ProvidedStorageLocation> actualProvidedStorageLocationOpt
         = aliasMap.read(block);
@@ -75,7 +76,7 @@ public class ITestInMemoryAliasMap {
 
   @Test
   public void readWrite() throws Exception {
-    Block block = new Block(42, 43, 44);
+    Block block = new HdfsBlock(42, 43, 44);
 
     Path path = new Path("eagle", "mouse");
     long offset = 47;
@@ -100,9 +101,9 @@ public class ITestInMemoryAliasMap {
 
   @Test
   public void list() throws IOException {
-    Block block1 = new Block(42, 43, 44);
-    Block block2 = new Block(43, 44, 45);
-    Block block3 = new Block(44, 45, 46);
+    Block block1 = new HdfsBlock(42, 43, 44);
+    Block block2 = new HdfsBlock(43, 44, 45);
+    Block block3 = new HdfsBlock(44, 45, 46);
 
     Path path = new Path("eagle", "mouse");
     int nonceSize = 4;

@@ -512,7 +512,7 @@ public class TestBlockManager {
   }
 
   private BlockInfo blockOnNodes(long blkId, List<DatanodeDescriptor> nodes) {
-    Block block = new Block(blkId);
+    Block block = new SwappableBlock(blkId);
     BlockInfo blockInfo = new BlockInfoContiguous(block, (short) 3);
 
     for (DatanodeDescriptor dn : nodes) {
@@ -640,7 +640,7 @@ public class TestBlockManager {
     bm.replicationStreamsHardLimit = 1;
 
     long blockId = 42;         // arbitrary
-    Block aBlock = new Block(blockId, 0, 0);
+    Block aBlock = new SwappableBlock(blockId, 0, 0);
 
     List<DatanodeDescriptor> origNodes = getNodes(0, 1);
     // Add the block to the first node.
@@ -692,7 +692,7 @@ public class TestBlockManager {
     bm.replicationStreamsHardLimit = 1;
 
     long blockId = 42;         // arbitrary
-    Block aBlock = new Block(blockId, 0, 0);
+    Block aBlock = new SwappableBlock(blockId, 0, 0);
     List<DatanodeDescriptor> origNodes = getNodes(0, 1);
     // Add the block to the first node.
     addBlockOnNodes(blockId,origNodes.subList(0,1));
@@ -823,33 +823,33 @@ public class TestBlockManager {
     // blk_42 is finalized.
     long receivedBlockId = 42;  // arbitrary
     BlockInfo receivedBlock = addBlockToBM(receivedBlockId);
-    rdbiList.add(new ReceivedDeletedBlockInfo(new Block(receivedBlock),
+    rdbiList.add(new ReceivedDeletedBlockInfo(new SwappableBlock(receivedBlock),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null));
     builder.add(new FinalizedReplica(receivedBlock, null, null));
 
     // blk_43 is under construction.
     long receivingBlockId = 43;
     BlockInfo receivingBlock = addUcBlockToBM(receivingBlockId);
-    rdbiList.add(new ReceivedDeletedBlockInfo(new Block(receivingBlock),
+    rdbiList.add(new ReceivedDeletedBlockInfo(new SwappableBlock(receivingBlock),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVING_BLOCK, null));
     builder.add(new ReplicaBeingWritten(receivingBlock, null, null, null));
 
     // blk_44 has 2 records in IBR. It's finalized. So full BR has 1 record.
     long receivingReceivedBlockId = 44;
     BlockInfo receivingReceivedBlock = addBlockToBM(receivingReceivedBlockId);
-    rdbiList.add(new ReceivedDeletedBlockInfo(new Block(receivingReceivedBlock),
+    rdbiList.add(new ReceivedDeletedBlockInfo(new SwappableBlock(receivingReceivedBlock),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVING_BLOCK, null));
-    rdbiList.add(new ReceivedDeletedBlockInfo(new Block(receivingReceivedBlock),
+    rdbiList.add(new ReceivedDeletedBlockInfo(new SwappableBlock(receivingReceivedBlock),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null));
     builder.add(new FinalizedReplica(receivingReceivedBlock, null, null));
 
     // blk_45 is not in full BR, because it's deleted.
     long ReceivedDeletedBlockId = 45;
     rdbiList.add(new ReceivedDeletedBlockInfo(
-        new Block(ReceivedDeletedBlockId),
+        new SwappableBlock(ReceivedDeletedBlockId),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null));
     rdbiList.add(new ReceivedDeletedBlockInfo(
-        new Block(ReceivedDeletedBlockId),
+        new SwappableBlock(ReceivedDeletedBlockId),
         ReceivedDeletedBlockInfo.BlockStatus.DELETED_BLOCK, null));
 
     // blk_46 exists in DN for a long time, so it's in full BR, but not in IBR.
@@ -870,14 +870,14 @@ public class TestBlockManager {
     assertEquals(1, ds.getBlockReportCount());
 
     // verify the storage info is correct
-    assertTrue(bm.getStoredBlock(new Block(receivedBlockId)).findStorageInfo
+    assertTrue(bm.getStoredBlock(new SwappableBlock(receivedBlockId)).findStorageInfo
         (ds) >= 0);
-    assertTrue(bm.getStoredBlock(new Block(receivingBlockId))
+    assertTrue(bm.getStoredBlock(new SwappableBlock(receivingBlockId))
         .getUnderConstructionFeature().getNumExpectedLocations() > 0);
-    assertTrue(bm.getStoredBlock(new Block(receivingReceivedBlockId))
+    assertTrue(bm.getStoredBlock(new SwappableBlock(receivingReceivedBlockId))
         .findStorageInfo(ds) >= 0);
-    assertNull(bm.getStoredBlock(new Block(ReceivedDeletedBlockId)));
-    assertTrue(bm.getStoredBlock(new Block(existedBlock)).findStorageInfo
+    assertNull(bm.getStoredBlock(new SwappableBlock(ReceivedDeletedBlockId)));
+    assertTrue(bm.getStoredBlock(new SwappableBlock(existedBlock)).findStorageInfo
         (ds) >= 0);
   }
 
@@ -962,10 +962,10 @@ public class TestBlockManager {
     long blockId = 42;  // arbitrary
     BlockInfo receivedBlock = addUcBlockToBM(blockId);
 
-    rdbiList.add(new ReceivedDeletedBlockInfo(new Block(receivedBlock),
+    rdbiList.add(new ReceivedDeletedBlockInfo(new SwappableBlock(receivedBlock),
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK, null));
     rdbiList.add(new ReceivedDeletedBlockInfo(
-        new Block(blockId),
+        new SwappableBlock(blockId),
         ReceivedDeletedBlockInfo.BlockStatus.DELETED_BLOCK, null));
 
     // process IBR
@@ -981,7 +981,7 @@ public class TestBlockManager {
   }
 
   private BlockInfo addBlockToBM(long blkId) {
-    Block block = new Block(blkId);
+    Block block = new SwappableBlock(blkId);
     BlockInfo blockInfo = new BlockInfoContiguous(block, (short) 3);
     long inodeId = ++mockINodeId;
     final INodeFile bc = TestINodeFile.createINodeFile(inodeId);
@@ -992,7 +992,7 @@ public class TestBlockManager {
   }
 
   private BlockInfo addUcBlockToBM(long blkId) {
-    Block block = new Block(blkId);
+    Block block = new SwappableBlock(blkId);
     BlockInfo blockInfo = new BlockInfoContiguous(block, (short) 3);
     blockInfo.convertToBlockUnderConstruction(UNDER_CONSTRUCTION, null);
     long inodeId = ++mockINodeId;
@@ -1655,8 +1655,8 @@ public class TestBlockManager {
 
     InvalidateBlocks ibs = new InvalidateBlocks(100, 30000, bim);
 
-    Block legacy = new Block(-1, 10, legancyGenerationStampLimit / 10);
-    Block striped = new Block(
+    Block legacy = new SwappableBlock(-1, 10, legancyGenerationStampLimit / 10);
+    Block striped = new SwappableBlock(
         bm.nextBlockId(BlockType.STRIPED), 10,
         legancyGenerationStampLimit + 10);
 

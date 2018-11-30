@@ -59,7 +59,7 @@ public class TestCorruptReplicaInfo {
     if (!replicaMap.containsKey(blockId)) {
       short replFactor = 3;
       replicaMap.put(blockId,
-          new BlockInfoContiguous(new Block(blockId, 0, 0), replFactor));
+          new BlockInfoContiguous(new SwappableBlock(blockId, 0, 0), replFactor));
     }
     return replicaMap.get(blockId);
   }
@@ -73,7 +73,7 @@ public class TestCorruptReplicaInfo {
     assertTrue(BlockIdManager.isStripedBlockID(stripedBlockId));
     if (!stripedBlocksMap.containsKey(stripedBlockId)) {
       stripedBlocksMap.put(stripedBlockId,
-          new BlockInfoStriped(new Block(stripedBlockId, 1024, 0),
+          new BlockInfoStriped(new SwappableBlock(stripedBlockId, 1024, 0),
               StripedFileTestUtil.getDefaultECPolicy()));
     }
     return stripedBlocksMap.get(stripedBlockId);
@@ -99,7 +99,7 @@ public class TestCorruptReplicaInfo {
     BlockIdManager bim = Mockito.mock(BlockIdManager.class);
     when(bim.isLegacyBlock(any(Block.class))).thenReturn(false);
     when(bim.isStripedBlock(any(Block.class))).thenCallRealMethod();
-    assertTrue(!bim.isLegacyBlock(new Block(-1)));
+    assertTrue(!bim.isLegacyBlock(new SwappableBlock(-1)));
 
     // Make sure initial values are returned correctly
     assertEquals("Total number of corrupt blocks must initially be 0!",

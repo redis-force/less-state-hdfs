@@ -1,0 +1,27 @@
+branches:
+  only:
+    # This is where pull requests from "bors r+" are built.
+    - staging
+    # This is where pull requests from "bors try" are built.
+    - trying
+    # Enable building pull requests.
+    - master
+
+dist: xenial
+language: java
+sudo: false
+
+jdk:
+  - openjdk8
+
+os:
+  - linux
+
+cache:
+ directories:
+   - $HOME/.m2
+
+install: true
+
+script:
+  - mvn package -Pdist -DskipTests=true -Dtar

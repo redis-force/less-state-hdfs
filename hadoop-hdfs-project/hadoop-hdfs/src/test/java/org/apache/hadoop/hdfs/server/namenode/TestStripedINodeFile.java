@@ -39,6 +39,7 @@ import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockStoragePolicySuite;
@@ -113,7 +114,7 @@ public class TestStripedINodeFile {
 
   @Test
   public void testBlockStripedTotalBlockCount() {
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped
         = new BlockInfoStriped(blk, testECPolicy);
     assertEquals(9, blockInfoStriped.getTotalBlockNum());
@@ -178,7 +179,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedLength()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped
         = new BlockInfoStriped(blk, testECPolicy);
     inf.addBlock(blockInfoStriped);
@@ -189,7 +190,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedConsumedSpace()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped
         = new BlockInfoStriped(blk, testECPolicy);
     blockInfoStriped.setNumBytes(1);
@@ -214,11 +215,11 @@ public class TestStripedINodeFile {
   public void testMultipleBlockStripedConsumedSpace()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk1 = new Block(1);
+    Block blk1 = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped1
         = new BlockInfoStriped(blk1, testECPolicy);
     blockInfoStriped1.setNumBytes(1);
-    Block blk2 = new Block(2);
+    Block blk2 = new SwappableBlock(2);
     BlockInfoStriped blockInfoStriped2
         = new BlockInfoStriped(blk2, testECPolicy);
     blockInfoStriped2.setNumBytes(1);
@@ -233,7 +234,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedFileSize()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped
         = new BlockInfoStriped(blk, testECPolicy);
     blockInfoStriped.setNumBytes(100);
@@ -248,7 +249,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedUCFileSize()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped bInfoUCStriped = new BlockInfoStriped(blk, testECPolicy);
     bInfoUCStriped.convertToBlockUnderConstruction(
         HdfsServerConstants.BlockUCState.UNDER_CONSTRUCTION, null);
@@ -262,7 +263,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedComputeQuotaUsage()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped blockInfoStriped
         = new BlockInfoStriped(blk, testECPolicy);
     blockInfoStriped.setNumBytes(100);
@@ -283,7 +284,7 @@ public class TestStripedINodeFile {
   public void testBlockStripedUCComputeQuotaUsage()
       throws IOException, InterruptedException {
     INodeFile inf = createStripedINodeFile();
-    Block blk = new Block(1);
+    Block blk = new SwappableBlock(1);
     BlockInfoStriped bInfoUCStriped = new BlockInfoStriped(blk, testECPolicy);
     bInfoUCStriped.convertToBlockUnderConstruction(
         HdfsServerConstants.BlockUCState.UNDER_CONSTRUCTION, null);

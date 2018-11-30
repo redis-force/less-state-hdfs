@@ -110,6 +110,7 @@ import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
 import org.apache.hadoop.hdfs.client.HdfsDataInputStream;
 import org.apache.hadoop.hdfs.protocol.AddErasureCodingPolicyResponse;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.CacheDirectiveInfo;
 import org.apache.hadoop.hdfs.protocol.CachePoolInfo;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
@@ -2172,7 +2173,7 @@ public class DFSTestUtil {
     // 1. RECEIVING_BLOCK IBR
     for (int i = 0; i < groupSize; i++) {
       DataNode dn = dataNodes.get(i);
-      final Block block = new Block(lastBlock.getBlockId() + i, 0,
+      final Block block = new HdfsBlock(lastBlock.getBlockId() + i, 0,
           lastBlock.getGenerationStamp());
       DatanodeStorage storage = new DatanodeStorage(UUID.randomUUID().toString());
       StorageReceivedDeletedBlocks[] reports = DFSTestUtil
@@ -2190,7 +2191,7 @@ public class DFSTestUtil {
         numStripes * ecPolicy.getCellSize() : len;
     for (int i = 0; i < groupSize; i++) {
       DataNode dn = dataNodes.get(i);
-      final Block block = new Block(lastBlock.getBlockId() + i,
+      final Block block = new HdfsBlock(lastBlock.getBlockId() + i,
           blockSize, lastBlock.getGenerationStamp());
       DatanodeStorage storage = new DatanodeStorage(UUID.randomUUID().toString());
       StorageReceivedDeletedBlocks[] reports = DFSTestUtil

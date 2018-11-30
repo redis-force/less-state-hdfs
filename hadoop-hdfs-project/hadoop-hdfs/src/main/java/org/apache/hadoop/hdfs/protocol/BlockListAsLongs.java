@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs.BlockReportReplica;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 import org.apache.hadoop.hdfs.server.datanode.Replica;
 import com.google.common.annotations.VisibleForTesting;
@@ -203,7 +204,7 @@ public abstract class BlockListAsLongs implements Iterable<BlockReportReplica> {
    * the overhead of protobuf repeating fields.  Primitive repeating fields
    * require re-allocs of an ArrayList<Long> and the associated (un)boxing
    * overhead which puts pressure on GC.
-   * 
+   *
    * The structure of the buffer is as follows:
    * - each replica is represented by 4 longs:
    *   blockId, block length, genstamp, replica state
@@ -237,7 +238,7 @@ public abstract class BlockListAsLongs implements Iterable<BlockReportReplica> {
    * Convert block report to old-style list of longs.  Only used to
    * re-encode the block report when the DN detects an older NN. This is
    * inefficient, but in practice a DN is unlikely to be upgraded first
-   * 
+   *
    * The structure of the array is as follows:
    * 0: the length of the finalized replica list;
    * 1: the length of the under-construction replica list;
@@ -246,7 +247,7 @@ public abstract class BlockListAsLongs implements Iterable<BlockReportReplica> {
    *   the generation stamp;
    * - followed by the invalid replica represented with three -1s;
    * - followed by the under-construction replica list where each replica is
-   *   represented by 4 longs: three for the block id, length, generation 
+   *   represented by 4 longs: three for the block id, length, generation
    *   stamp, and the fourth for the replica state.
    * @return list of longs
    */
@@ -295,7 +296,7 @@ public abstract class BlockListAsLongs implements Iterable<BlockReportReplica> {
     public int getNumberOfBlocks() {
       return numBlocks;
     }
-    
+
     public BlockListAsLongs build() {
       try {
         cos.flush();
@@ -519,9 +520,9 @@ public abstract class BlockListAsLongs implements Iterable<BlockReportReplica> {
       };
     }
   }
-  
+
   @InterfaceAudience.Private
-  public static class BlockReportReplica extends Block implements Replica {
+  public static class BlockReportReplica extends SwappableBlock implements Replica {
     private ReplicaState state;
     private BlockReportReplica() {
     }

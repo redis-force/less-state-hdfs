@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.fs.permission.PermissionStatus;
 import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.DeprecatedUTF8;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.CacheDirectiveInfo;
 import org.apache.hadoop.hdfs.protocol.CachePoolInfo;
@@ -69,10 +70,10 @@ public class FSImageSerialization {
 
   // Static-only class
   private FSImageSerialization() {}
-  
+
   /**
    * In order to reduce allocation, we reuse some static objects. However, the methods
-   * in this class should be thread-safe since image-saving is multithreaded, so 
+   * in this class should be thread-safe since image-saving is multithreaded, so
    * we need to keep the static objects in a thread-local.
    */
   static private final ThreadLocal<TLData> TL_DATA =
@@ -132,7 +133,7 @@ public class FSImageSerialization {
 
     final BlockInfoContiguous[] blocksContiguous =
         new BlockInfoContiguous[numBlocks];
-    Block blk = new Block();
+    Block blk = new SwappableBlock();
     int i = 0;
     for (; i < numBlocks - 1; i++) {
       blk.readFields(in);
@@ -362,7 +363,7 @@ public class FSImageSerialization {
     ustr.write(out);
   }
 
-  
+
   /** read the long value */
   static long readLong(DataInput in) throws IOException {
     LongWritable uLong = TL_DATA.get().U_LONG;
@@ -376,22 +377,22 @@ public class FSImageSerialization {
     uLong.set(value);
     uLong.write(out);
   }
-  
+
   /** read the boolean value */
   static boolean readBoolean(DataInput in) throws IOException {
     BooleanWritable uBoolean = TL_DATA.get().U_BOOLEAN;
     uBoolean.readFields(in);
     return uBoolean.get();
   }
-  
+
   /** write the boolean value */
-  static void writeBoolean(boolean value, DataOutputStream out) 
+  static void writeBoolean(boolean value, DataOutputStream out)
       throws IOException {
     BooleanWritable uBoolean = TL_DATA.get().U_BOOLEAN;
     uBoolean.set(value);
     uBoolean.write(out);
   }
-  
+
   /** write the byte value */
   static void writeByte(byte value, DataOutputStream out)
       throws IOException {
@@ -404,7 +405,7 @@ public class FSImageSerialization {
     uInt.readFields(in);
     return uInt.get();
   }
-  
+
   /** write the int value */
   static void writeInt(int value, DataOutputStream out) throws IOException {
     IntWritable uInt = TL_DATA.get().U_INT;
@@ -425,7 +426,7 @@ public class FSImageSerialization {
     uShort.set(value);
     uShort.write(out);
   }
-  
+
   // Same comments apply for this method as for readString()
   @SuppressWarnings("deprecation")
   public static byte[] readBytes(DataInput in) throws IOException {
@@ -445,7 +446,7 @@ public class FSImageSerialization {
    * Reading the path from the image and converting it to byte[][] directly
    * this saves us an array copy and conversions to and from String
    * @param in input to read from
-   * @return the array each element of which is a byte[] representation 
+   * @return the array each element of which is a byte[] representation
    *            of a path component
    * @throws IOException
    */
@@ -453,12 +454,12 @@ public class FSImageSerialization {
   public static byte[][] readPathComponents(DataInput in)
       throws IOException {
     DeprecatedUTF8 ustr = TL_DATA.get().U_STR;
-    
+
     ustr.readFields(in);
     return DFSUtil.bytes2byteArray(ustr.getBytes(),
       ustr.getLength(), (byte) Path.SEPARATOR_CHAR);
   }
-  
+
   public static byte[] readLocalName(DataInput in) throws IOException {
     byte[] createdNodeName = new byte[in.readShort()];
     in.readFully(createdNodeName);
@@ -470,7 +471,7 @@ public class FSImageSerialization {
     final byte[] name = inode.getLocalNameBytes();
     writeBytes(name, out);
   }
-  
+
   public static void writeBytes(byte[] data, DataOutput out)
       throws IOException {
     out.writeShort(data.length);
@@ -498,7 +499,7 @@ public class FSImageSerialization {
       prev = b;
     }
   }
-  
+
   public static Block[] readCompactBlockArray(
       DataInput in, int logVersion) throws IOException {
     int num = WritableUtils.readVInt(in);
@@ -513,7 +514,7 @@ public class FSImageSerialization {
           ((prev != null) ? prev.getNumBytes() : 0);
       long gs = WritableUtils.readVLong(in) +
           ((prev != null) ? prev.getGenerationStamp() : 0);
-      ret[i] = new Block(id, sz, gs);
+      ret[i] = new SwappableBlock(id, sz, gs);
       prev = ret[i];
     }
     return ret;

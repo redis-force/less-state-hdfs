@@ -29,6 +29,7 @@ import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.hdfs.protocol.LocatedStripedBlock;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
@@ -106,7 +107,7 @@ public class TestAddOverReplicatedStripedBlocks {
     long gs = bg.getBlock().getGenerationStamp();
     String bpid = bg.getBlock().getBlockPoolId();
     long groupId = bg.getBlock().getBlockId();
-    Block blk = new Block(groupId, blockSize, gs);
+    Block blk = new SwappableBlock(groupId, blockSize, gs);
     for (int i = 0; i < groupSize; i++) {
       blk.setBlockId(groupId + i);
       cluster.injectBlocks(i, Arrays.asList(blk), bpid);
@@ -149,7 +150,7 @@ public class TestAddOverReplicatedStripedBlocks {
     long gs = bg.getBlock().getGenerationStamp();
     String bpid = bg.getBlock().getBlockPoolId();
     long groupId = bg.getBlock().getBlockId();
-    Block blk = new Block(groupId, blockSize, gs);
+    Block blk = new SwappableBlock(groupId, blockSize, gs);
     cluster.triggerBlockReports();
     List<DatanodeInfo> infos = Arrays.asList(bg.getLocations());
 
@@ -191,7 +192,7 @@ public class TestAddOverReplicatedStripedBlocks {
     long gs = bg.getBlock().getGenerationStamp();
     String bpid = bg.getBlock().getBlockPoolId();
     long groupId = bg.getBlock().getBlockId();
-    Block blk = new Block(groupId, blockSize, gs);
+    Block blk = new SwappableBlock(groupId, blockSize, gs);
     BlockInfoStriped blockInfo = new BlockInfoStriped(blk,
         StripedFileTestUtil.getDefaultECPolicy());
     for (int i = 0; i < groupSize; i++) {
@@ -257,7 +258,7 @@ public class TestAddOverReplicatedStripedBlocks {
     long gs = bg.getBlock().getGenerationStamp();
     String bpid = bg.getBlock().getBlockPoolId();
     long groupId = bg.getBlock().getBlockId();
-    Block blk = new Block(groupId, blockSize, gs);
+    Block blk = new SwappableBlock(groupId, blockSize, gs);
     // only inject GROUP_SIZE - 1 blocks, so there is one block missing
     for (int i = 0; i < groupSize - 1; i++) {
       blk.setBlockId(groupId + i);

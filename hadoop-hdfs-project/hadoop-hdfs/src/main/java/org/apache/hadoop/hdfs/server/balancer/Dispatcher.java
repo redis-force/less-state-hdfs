@@ -54,6 +54,7 @@ import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.DFSUtilClient;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
@@ -260,7 +261,7 @@ public class Dispatcher {
     /**
      * Choose a good block/blockGroup from source & Get reportedBlock from
      * the block & Choose a proxy source for the reportedBlock.
-     * 
+     *
      * @return true if a block and its proxy are chosen; false otherwise
      */
     private boolean chooseBlockAndProxy() {
@@ -303,7 +304,7 @@ public class Dispatcher {
 
     /**
      * Choose a proxy source.
-     * 
+     *
      * @return true if a proxy is found; otherwise false
      */
     private boolean chooseProxySource() {
@@ -377,7 +378,7 @@ public class Dispatcher {
         InputStream unbufIn = sock.getInputStream();
         ExtendedBlock eb = new ExtendedBlock(nnc.getBlockpoolID(),
             reportedBlock.getBlock());
-        final KeyManager km = nnc.getKeyManager(); 
+        final KeyManager km = nnc.getKeyManager();
         Token<BlockTokenIdentifier> accessToken = km.getAccessToken(eb,
             new StorageType[]{target.storageType}, new String[0]);
         IOStreamPair saslStreams = saslClient.socketSend(sock, unbufOut,
@@ -505,7 +506,7 @@ public class Dispatcher {
       long blkId = getBlock().getBlockId() + idxInGroup;
       long numBytes = getInternalBlockLength(getNumBytes(), cellSize,
           dataBlockNum, idxInGroup);
-      Block blk = new Block(getBlock());
+      Block blk = new SwappableBlock(getBlock());
       blk.setBlockId(blkId);
       blk.setNumBytes(numBytes);
       DBlock dblk = new DBlock(blk);
@@ -547,7 +548,7 @@ public class Dispatcher {
         this.storageType = storageType;
         this.maxSize2Move = maxSize2Move;
       }
-      
+
       public StorageType getStorageType() {
         return storageType;
       }
@@ -790,7 +791,7 @@ public class Dispatcher {
     /**
      * Fetch new blocks of this source from namenode and update this source's
      * block list & {@link Dispatcher#globalBlocks}.
-     * 
+     *
      * @return the total size of the received blocks in the number of bytes.
      */
     private long getBlockList() throws IOException {
@@ -873,7 +874,7 @@ public class Dispatcher {
      * dispatched immediately after this method is returned.
      * If the block is a block group. Only the internal block on this source
      * will be dispatched.
-     * 
+     *
      * @return a move that's good for the source to dispatch immediately.
      */
     private PendingMove chooseNextMove() {
@@ -899,7 +900,7 @@ public class Dispatcher {
       }
       return null;
     }
-    
+
     /** Add a pending move */
     public PendingMove addPendingMove(DBlock block, StorageGroup target) {
       return target.addPendingMove(block, new PendingMove(this, target));
@@ -1070,7 +1071,7 @@ public class Dispatcher {
   public NetworkTopology getCluster() {
     return cluster;
   }
-  
+
   long getBytesMoved() {
     return nnc.getBytesMoved().get();
   }
@@ -1117,7 +1118,7 @@ public class Dispatcher {
   /** Get live datanode storage reports and then build the network topology. */
   public List<DatanodeStorageReport> init() throws IOException {
     final DatanodeStorageReport[] reports = nnc.getLiveDatanodeStorageReport();
-    final List<DatanodeStorageReport> trimmed = new ArrayList<DatanodeStorageReport>(); 
+    final List<DatanodeStorageReport> trimmed = new ArrayList<DatanodeStorageReport>();
     // create network topology and classify utilization collections:
     // over-utilized, above-average, below-average and under-utilized.
     for (DatanodeStorageReport r : DFSUtil.shuffle(reports)) {
@@ -1175,7 +1176,7 @@ public class Dispatcher {
    * sends request to proxy source to initiate block move. The process is flow
    * controlled. Block selection is blocked if there are too many un-confirmed
    * block moves.
-   * 
+   *
    * @return the total number of bytes successfully moved in this iteration.
    */
   private long dispatchBlockMoves() throws InterruptedException {
@@ -1407,7 +1408,7 @@ public class Dispatcher {
     /**
      * Match is checked using host name , ip address with and without port
      * number.
-     * 
+     *
      * @return true if the datanode's transfer address matches the set of nodes.
      */
     private static boolean isIn(Set<String> datanodes, DatanodeInfo dn) {

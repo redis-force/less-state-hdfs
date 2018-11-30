@@ -20,6 +20,7 @@ package org.apache.hadoop.hdfs.server.namenode;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.fs.permission.PermissionStatus;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoContiguous;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.DiffList;
@@ -150,7 +151,7 @@ public class TestTruncateQuotaUpdate {
   }
 
   private BlockInfo newBlock(long size, short replication) {
-    Block b = new Block(++nextMockBlockId, size, ++nextMockGenstamp);
+    Block b = new SwappableBlock(++nextMockBlockId, size, ++nextMockGenstamp);
     return new BlockInfoContiguous(b, replication);
   }
 

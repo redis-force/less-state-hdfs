@@ -18,6 +18,7 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.util.StripedBlockUtil;
 import org.apache.hadoop.net.Node;
@@ -153,7 +154,7 @@ class ErasureCodingWork extends BlockReconstructionWork {
     final long internBlkLen = StripedBlockUtil.getInternalBlockLength(
         stripedBlk.getNumBytes(), stripedBlk.getCellSize(),
         stripedBlk.getDataBlockNum(), blockIndex);
-    final Block targetBlk = new Block(stripedBlk.getBlockId() + blockIndex,
+    final Block targetBlk = new SwappableBlock(stripedBlk.getBlockId() + blockIndex,
         internBlkLen, stripedBlk.getGenerationStamp());
     source.addBlockToBeReplicated(targetBlk,
         new DatanodeStorageInfo[] {target});

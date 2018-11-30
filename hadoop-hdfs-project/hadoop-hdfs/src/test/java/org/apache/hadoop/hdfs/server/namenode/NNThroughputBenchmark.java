@@ -51,6 +51,7 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManagerTestUtil;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
@@ -982,7 +983,7 @@ public class NNThroughputBenchmark implements Tool {
     void formBlockReport() {
       // fill remaining slots with blocks that do not exist
       for (int idx = blocks.size()-1; idx >= nrBlocks; idx--) {
-        Block block = new Block(blocks.size() - idx, 0, 0);
+        Block block = new SwappableBlock(blocks.size() - idx, 0, 0);
         blocks.set(idx, new BlockReportReplica(block));
       }
       blockReportList = BlockListAsLongs.encode(blocks);

@@ -34,13 +34,13 @@ import javax.annotation.Nonnull;
  **************************************************/
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class Block implements Writable, Comparable<Block> {
+public abstract class Block implements Writable, Comparable<Block> {
   public static final String BLOCK_FILE_PREFIX = "blk_";
   public static final String METADATA_EXTENSION = ".meta";
   static {                                      // register a ctor
     WritableFactories.setFactory(Block.class, new WritableFactory() {
       @Override
-      public Writable newInstance() { return new Block(); }
+      public Writable newInstance() { return new HdfsBlock(); }
     });
   }
 
@@ -89,10 +89,6 @@ public class Block implements Writable, Comparable<Block> {
     return m.matches() ? Long.parseLong(m.group(1)) : 0;
   }
 
-  private long blockId;
-  private long numBytes;
-  private long generationStamp;
-
   public Block() {this(0, 0, 0);}
 
   public Block(final long blkid, final long len, final long generationStamp) {
@@ -104,7 +100,7 @@ public class Block implements Writable, Comparable<Block> {
   }
 
   public Block(Block blk) {
-    this(blk.blockId, blk.numBytes, blk.generationStamp);
+    this(blk.getBlockId(), blk.getNumBytes(), blk.getGenerationStamp());
   }
 
   /**
@@ -115,43 +111,29 @@ public class Block implements Writable, Comparable<Block> {
   }
 
   public void set(long blkid, long len, long genStamp) {
-    this.blockId = blkid;
-    this.numBytes = len;
-    this.generationStamp = genStamp;
+    setBlockId(blkid);
+    setNumBytes(blkid);
+    setGenerationStamp(genStamp);
   }
   /**
    */
-  public long getBlockId() {
-    return blockId;
-  }
+  public abstract long getBlockId();
 
-  public void setBlockId(long bid) {
-    blockId = bid;
-  }
+  public abstract void setBlockId(long bid);
 
   /**
    */
   public String getBlockName() {
     return new StringBuilder().append(BLOCK_FILE_PREFIX)
-        .append(blockId).toString();
+        .append(getBlockId()).toString();
   }
 
   /**
    */
-  public long getNumBytes() {
-    return numBytes;
-  }
-  public void setNumBytes(long len) {
-    this.numBytes = len;
-  }
-
-  public long getGenerationStamp() {
-    return generationStamp;
-  }
-
-  public void setGenerationStamp(long stamp) {
-    generationStamp = stamp;
-  }
+  public abstract long getNumBytes();
+  public abstract void setNumBytes(long len);
+  public abstract long getGenerationStamp();
+  public abstract void setGenerationStamp(long stamp);
 
   /**
    * A helper method to output the string representation of the Block portion of
@@ -163,8 +145,8 @@ public class Block implements Writable, Comparable<Block> {
   public static String toString(final Block b) {
     StringBuilder sb = new StringBuilder();
     sb.append(BLOCK_FILE_PREFIX).
-       append(b.blockId).append("_").
-       append(b.generationStamp);
+       append(b.getBlockId()).append("_").
+       append(b.getGenerationStamp());
     return sb.toString();
   }
 
@@ -177,7 +159,7 @@ public class Block implements Writable, Comparable<Block> {
 
   public void appendStringTo(StringBuilder sb) {
     sb.append(BLOCK_FILE_PREFIX)
-      .append(blockId)
+      .append(getBlockId())
       .append("_")
       .append(getGenerationStamp());
   }
@@ -197,36 +179,36 @@ public class Block implements Writable, Comparable<Block> {
   }
 
   final void writeHelper(DataOutput out) throws IOException {
-    out.writeLong(blockId);
-    out.writeLong(numBytes);
-    out.writeLong(generationStamp);
+    out.writeLong(getBlockId());
+    out.writeLong(getNumBytes());
+    out.writeLong(getGenerationStamp());
   }
 
   final void readHelper(DataInput in) throws IOException {
-    this.blockId = in.readLong();
-    this.numBytes = in.readLong();
-    this.generationStamp = in.readLong();
-    if (numBytes < 0) {
-      throw new IOException("Unexpected block size: " + numBytes);
+    this.setBlockId(in.readLong());
+    this.setNumBytes(in.readLong());
+    this.setGenerationStamp(in.readLong());
+    if (getNumBytes() < 0) {
+      throw new IOException("Unexpected block size: " + getNumBytes());
     }
   }
 
   // write only the identifier part of the block
   public void writeId(DataOutput out) throws IOException {
-    out.writeLong(blockId);
-    out.writeLong(generationStamp);
+    out.writeLong(getBlockId());
+    out.writeLong(getGenerationStamp());
   }
 
   // Read only the identifier part of the block
   public void readId(DataInput in) throws IOException {
-    this.blockId = in.readLong();
-    this.generationStamp = in.readLong();
+    this.setBlockId(in.readLong());
+    this.setGenerationStamp(in.readLong());
   }
 
   @Override // Comparable
   public int compareTo(@Nonnull Block b) {
-    return blockId < b.blockId ? -1 :
-        blockId > b.blockId ? 1 : 0;
+    return getBlockId() < b.getBlockId() ? -1 :
+        getBlockId() > b.getBlockId() ? 1 : 0;
   }
 
   @Override // Object
@@ -242,13 +224,13 @@ public class Block implements Writable, Comparable<Block> {
     if (a == b) return true; // same block, or both null
     // only one null
     return !(a == null || b == null) &&
-        a.blockId == b.blockId &&
-        a.generationStamp == b.generationStamp;
+        a.getBlockId() == b.getBlockId() &&
+        a.getGenerationStamp() == b.getGenerationStamp();
   }
 
   @Override // Object
   public int hashCode() {
     //GenerationStamp is IRRELEVANT and should not be used here
-    return (int)(blockId^(blockId>>>32));
+    return (int)(getBlockId()^(getBlockId()>>>32));
   }
 }

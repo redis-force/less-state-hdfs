@@ -169,7 +169,7 @@ public class BlockInfoStriped extends BlockInfo {
     if (index < 0) {
       return null;
     } else {
-      Block block = new Block(this);
+      SwappableBlock block = new SwappableBlock(this);
       block.setBlockId(this.getBlockId() + index);
       return block;
     }

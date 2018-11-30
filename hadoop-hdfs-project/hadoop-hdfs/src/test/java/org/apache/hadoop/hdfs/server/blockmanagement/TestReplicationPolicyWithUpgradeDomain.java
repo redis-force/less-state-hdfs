@@ -223,7 +223,7 @@ public class TestReplicationPolicyWithUpgradeDomain
   public void testVerifyBlockPlacement() throws Exception {
     LocatedBlock locatedBlock;
     BlockPlacementStatus status;
-    ExtendedBlock b = new ExtendedBlock("fake-pool", new Block(12345L));
+    ExtendedBlock b = new ExtendedBlock("fake-pool", new SwappableBlock(12345L));
     List<DatanodeStorageInfo> set = new ArrayList<>();
 
     // 2 upgrade domains (not enough), 2 racks (enough)

@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.UnresolvedLinkException;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.BlockStoragePolicy;
 import org.apache.hadoop.hdfs.protocol.QuotaExceededException;
 import org.apache.hadoop.hdfs.protocol.SnapshotAccessControlException;
@@ -230,7 +231,7 @@ final class FSDirTruncateOp {
     if (newBlock == null) {
       newBlock = (shouldCopyOnTruncate) ?
           fsn.createNewBlock(BlockType.CONTIGUOUS)
-          : new Block(oldBlock.getBlockId(), oldBlock.getNumBytes(),
+          : new SwappableBlock(oldBlock.getBlockId(), oldBlock.getNumBytes(),
           fsn.nextGenerationStamp(fsn.getBlockManager().isLegacyBlock(
               oldBlock)));
     }

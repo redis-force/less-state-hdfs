@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 
 import com.google.common.collect.Lists;
@@ -32,14 +33,14 @@ import com.google.common.collect.Maps;
  * before they are actually available in the namespace, or while
  * they have an outdated state in the namespace. In those cases,
  * we queue those block-related messages in this structure.
- * */  
+ * */
 class PendingDataNodeMessages {
-  
+
   final Map<Block, Queue<ReportedBlockInfo>> queueByBlockId =
     Maps.newHashMap();
   private int count = 0;
-  
-    
+
+
   static class ReportedBlockInfo {
     private final Block block;
     private final DatanodeStorageInfo storageInfo;
@@ -59,7 +60,7 @@ class PendingDataNodeMessages {
     ReplicaState getReportedState() {
       return reportedState;
     }
-    
+
     DatanodeStorageInfo getStorageInfo() {
       return storageInfo;
     }
@@ -71,7 +72,7 @@ class PendingDataNodeMessages {
           + ", reportedState=" + reportedState + "]";
     }
   }
-  
+
   /**
    * Remove all pending DN messages which reference the given DN.
    * @param dn the datanode whose messages we should remove.
@@ -92,15 +93,15 @@ class PendingDataNodeMessages {
       queueByBlockId.put(entry.getKey(), newQueue);
     }
   }
-  
+
   void enqueueReportedBlock(DatanodeStorageInfo storageInfo, Block block,
       ReplicaState reportedState) {
-    block = new Block(block);
+    block = new SwappableBlock(block);
     getBlockQueue(block).add(
         new ReportedBlockInfo(storageInfo, block, reportedState));
     count++;
   }
-  
+
   /**
    * @return any messages that were previously queued for the given block,
    * or null if no messages were queued.
@@ -122,7 +123,7 @@ class PendingDataNodeMessages {
     }
     return queue;
   }
-  
+
   int count() {
     return count ;
   }

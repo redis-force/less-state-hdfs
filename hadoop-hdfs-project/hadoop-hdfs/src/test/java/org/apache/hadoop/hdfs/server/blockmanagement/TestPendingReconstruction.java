@@ -68,7 +68,7 @@ public class TestPendingReconstruction {
   private static final int DATANODE_COUNT = 5;
 
   private BlockInfo genBlockInfo(long id, long length, long gs) {
-    return new BlockInfoContiguous(new Block(id, length, gs),
+    return new BlockInfoContiguous(new SwappableBlock(id, length, gs),
         (short) DATANODE_COUNT);
   }
 
@@ -209,7 +209,7 @@ public class TestPendingReconstruction {
       // Add 1 block to pendingReconstructions with GenerationStamp = 0.
       //
 
-      block = new Block(1, 1, 0);
+      block = new SwappableBlock(1, 1, 0);
       blockInfo = new BlockInfoContiguous(block, (short) 3);
 
       pendingReconstruction.increment(blockInfo,
@@ -227,7 +227,7 @@ public class TestPendingReconstruction {
 
       // Add a second block to pendingReconstructions that has no
       // corresponding entry in blocksmap
-      block = new Block(2, 2, 0);
+      block = new SwappableBlock(2, 2, 0);
       blockInfo = new BlockInfoContiguous(block, (short) 3);
       pendingReconstruction.increment(blockInfo,
           DatanodeStorageInfo.toDatanodeDescriptors(
@@ -287,7 +287,7 @@ public class TestPendingReconstruction {
       try {
         // Use a wrong gen stamp.
         blkManager.addBlock(desc[0].getStorageInfos()[0],
-            new Block(1, 1, 0), null);
+            new SwappableBlock(1, 1, 0), null);
       } finally {
         fsn.writeUnlock();
       }
@@ -301,7 +301,7 @@ public class TestPendingReconstruction {
       fsn.writeLock();
       try {
         blkManager.addBlock(desc[0].getStorageInfos()[0],
-            new Block(1, 1, 1), null);
+            new SwappableBlock(1, 1, 1), null);
       } finally {
         fsn.writeUnlock();
       }

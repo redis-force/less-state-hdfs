@@ -18,6 +18,7 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 
 /**
@@ -30,7 +31,7 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
  * It is not guaranteed, but expected, that datanodes actually have
  * corresponding replicas.
  */
-class ReplicaUnderConstruction extends Block {
+class ReplicaUnderConstruction extends SwappableBlock {
   private final DatanodeStorageInfo expectedLocation;
   private HdfsServerConstants.ReplicaState state;
   private boolean chosenAsPrimary;

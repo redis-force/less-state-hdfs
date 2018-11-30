@@ -230,7 +230,7 @@ public class TestIncrementalBrVariations {
   }
 
   private static Block getDummyBlock() {
-    return new Block(10000000L, 100L, 1048576L);
+    return new HdfsBlock(10000000L, 100L, 1048576L);
   }
 
   /**

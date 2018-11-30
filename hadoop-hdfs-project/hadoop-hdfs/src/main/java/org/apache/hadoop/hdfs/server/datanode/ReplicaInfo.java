@@ -24,6 +24,7 @@ import java.net.URI;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.LocalFileSystem;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi.ScanInfo;
@@ -36,7 +37,7 @@ import org.apache.hadoop.util.LightWeightResizableGSet;
  * It provides a general interface for meta information of a replica.
  */
 @InterfaceAudience.Private
-abstract public class ReplicaInfo extends Block
+abstract public class ReplicaInfo extends HdfsBlock
     implements Replica, LightWeightResizableGSet.LinkedElement {
 
   /** For implementing {@link LightWeightResizableGSet.LinkedElement}. */
@@ -70,7 +71,7 @@ abstract public class ReplicaInfo extends Block
     super(blockId, len, genStamp);
     this.volume = vol;
   }
-  
+
   /**
    * Copy constructor.
    * @param from where to copy from

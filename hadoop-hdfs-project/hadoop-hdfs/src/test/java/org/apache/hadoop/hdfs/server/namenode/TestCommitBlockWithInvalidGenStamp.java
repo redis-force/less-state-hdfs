@@ -28,6 +28,7 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -75,7 +76,7 @@ public class TestCommitBlockWithInvalidGenStamp {
       Block newBlock = DFSTestUtil.addBlockToFile(false, cluster.getDataNodes(),
           dfs, cluster.getNamesystem(), file.toString(), fileNode,
           dfs.getClient().getClientName(), previous, 0, 100);
-      Block newBlockClone = new Block(newBlock);
+      Block newBlockClone = new SwappableBlock(newBlock);
       previous = new ExtendedBlock(cluster.getNamesystem().getBlockPoolId(),
           newBlockClone);
 

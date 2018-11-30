@@ -51,11 +51,11 @@ public class TestLowRedundancyBlockQueues {
   }
 
   private BlockInfo genBlockInfo(long id) {
-    return new BlockInfoContiguous(new Block(id), (short) 3);
+    return new BlockInfoContiguous(new SwappableBlock(id), (short) 3);
   }
 
   private BlockInfo genStripedBlockInfo(long id, long numBytes) {
-    BlockInfoStriped sblk =  new BlockInfoStriped(new Block(id), ecPolicy);
+    BlockInfoStriped sblk =  new BlockInfoStriped(new SwappableBlock(id), ecPolicy);
     sblk.setNumBytes(numBytes);
     return sblk;
   }

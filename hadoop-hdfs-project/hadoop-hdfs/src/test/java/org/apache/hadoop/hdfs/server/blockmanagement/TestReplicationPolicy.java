@@ -824,7 +824,7 @@ public class TestReplicationPolicy extends BaseReplicationPolicyTest {
   }
 
   private BlockInfo genBlockInfo(long id) {
-    return new BlockInfoContiguous(new Block(id), (short) 3);
+    return new BlockInfoContiguous(new SwappableBlock(id), (short) 3);
   }
 
   /**

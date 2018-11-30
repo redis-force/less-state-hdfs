@@ -36,6 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.protocol.CacheDirective;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeDescriptor.CachedBlocksList.Type;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
@@ -360,10 +361,10 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
       }
     }
   }
-  
+
   /**
    * Apply a CacheDirective to a file.
-   * 
+   *
    * @param directive The CacheDirective to apply.
    * @param file The file.
    */
@@ -402,7 +403,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
         );
         continue;
       }
-      Block block = new Block(blockInfo.getBlockId());
+      Block block = new SwappableBlock(blockInfo.getBlockId());
       CachedBlock ncblock = new CachedBlock(block.getBlockId(),
           directive.getReplication(), mark);
       CachedBlock ocblock = cachedBlocks.get(ncblock);
@@ -473,7 +474,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
       // field, seeing a replication of 0 on a CacheBlock means that it
       // has never been reached by any sweep.
       return "not needed by any directives";
-    } else if (cblock.getMark() != mark) { 
+    } else if (cblock.getMark() != mark) {
       // Although the block was needed in the past, we didn't reach it during
       // the current sweep.  Therefore, it doesn't need to be cached any more.
       // Need to set the replication to 0 so it doesn't flip back to cached
@@ -499,7 +500,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
            it.hasNext();) {
         CachedBlock cblock = it.next();
         BlockInfo blockInfo = blockManager.
-            getStoredBlock(new Block(cblock.getBlockId()));
+            getStoredBlock(new SwappableBlock(cblock.getBlockId()));
         if (blockInfo == null) {
           // Cannot find this block on the NameNode, skip this block from
           // capacity calculation. Later logic will handle this block.
@@ -541,7 +542,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
         }
       }
       BlockInfo blockInfo = blockManager.
-            getStoredBlock(new Block(cblock.getBlockId()));
+            getStoredBlock(new SwappableBlock(cblock.getBlockId()));
       String reason = findReasonForNotCaching(cblock, blockInfo);
       int neededCached = 0;
       if (reason != null) {
@@ -640,7 +641,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
       neededUncached--;
     }
   }
-  
+
   /**
    * Add new entries to the PendingCached list.
    *
@@ -656,7 +657,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
     // To figure out which replicas can be cached, we consult the
     // blocksMap.  We don't want to try to cache a corrupt replica, though.
     BlockInfo blockInfo = blockManager.
-          getStoredBlock(new Block(cachedBlock.getBlockId()));
+          getStoredBlock(new SwappableBlock(cachedBlock.getBlockId()));
     if (blockInfo == null) {
       LOG.debug("Block {}: can't add new cached replicas," +
           " because there is no record of this block " +
@@ -695,7 +696,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
       while (it.hasNext()) {
         CachedBlock cBlock = it.next();
         BlockInfo info =
-            blockManager.getStoredBlock(new Block(cBlock.getBlockId()));
+            blockManager.getStoredBlock(new SwappableBlock(cBlock.getBlockId()));
         if (info != null) {
           pendingBytes -= info.getNumBytes();
         }
@@ -705,7 +706,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
       while (it.hasNext()) {
         CachedBlock cBlock = it.next();
         BlockInfo info =
-            blockManager.getStoredBlock(new Block(cBlock.getBlockId()));
+            blockManager.getStoredBlock(new SwappableBlock(cBlock.getBlockId()));
         if (info != null) {
           pendingBytes += info.getNumBytes();
         }
@@ -746,7 +747,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
   /**
    * Chooses datanode locations for caching from a list of valid possibilities.
    * Non-stale nodes are chosen before stale nodes.
-   * 
+   *
    * @param possibilities List of candidate datanodes
    * @param neededCached Number of replicas needed
    * @param staleInterval Age of a stale datanode
@@ -793,7 +794,7 @@ public class CacheReplicationMonitor extends Thread implements Closeable {
   /**
    * Choose a single datanode from the provided list of possible
    * targets, weighted by the percentage of free space remaining on the node.
-   * 
+   *
    * @return The chosen datanode
    */
   private static DatanodeDescriptor chooseRandomDatanodeByRemainingCapacity(
