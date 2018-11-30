@@ -38,6 +38,7 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
 import org.apache.hadoop.hdfs.protocol.BlockType;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeDescriptor;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeManager;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo;
@@ -105,7 +106,7 @@ public class TestDeadDatanode {
     DatanodeProtocol dnp = cluster.getNameNodeRpc();
     
     ReceivedDeletedBlockInfo[] blocks = { new ReceivedDeletedBlockInfo(
-        new Block(0), 
+        new SwappableBlock(0), 
         ReceivedDeletedBlockInfo.BlockStatus.RECEIVED_BLOCK,
         null) };
     StorageReceivedDeletedBlocks[] storageBlocks = { 

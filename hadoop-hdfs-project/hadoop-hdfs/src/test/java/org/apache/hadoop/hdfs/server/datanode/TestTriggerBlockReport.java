@@ -32,6 +32,7 @@ import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.client.BlockReportOptions;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
@@ -91,7 +92,7 @@ public final class TestTriggerBlockReport {
     // Create a fake block deletion notification on the DataNode.
     // This will be sent with the next incremental block report.
     ReceivedDeletedBlockInfo rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5678, 512, 1000),  BlockStatus.DELETED_BLOCK, null);
+        new HdfsBlock(5678, 512, 1000),  BlockStatus.DELETED_BLOCK, null);
     DataNode datanode = cluster.getDataNodes().get(0);
     BPServiceActor actor =
         datanode.getAllBpOs().get(0).getBPServiceActors().get(0);

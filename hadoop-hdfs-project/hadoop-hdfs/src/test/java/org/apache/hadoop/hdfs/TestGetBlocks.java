@@ -33,6 +33,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
@@ -375,12 +376,12 @@ public class TestGetBlocks {
     long[] blkids = new long[10];
     for (int i = 0; i < blkids.length; i++) {
       blkids[i] = 1000L + RAN.nextInt(100000);
-      map.put(new Block(blkids[i], 0, blkids[i]), blkids[i]);
+      map.put(new HdfsBlock(blkids[i], 0, blkids[i]), blkids[i]);
     }
     System.out.println("map=" + map.toString().replace(",", "\n  "));
 
     for (int i = 0; i < blkids.length; i++) {
-      Block b = new Block(blkids[i], 0,
+      Block b = new HdfsBlock(blkids[i], 0,
           HdfsConstants.GRANDFATHER_GENERATION_STAMP);
       Long v = map.get(b);
       System.out.println(b + " => " + v);

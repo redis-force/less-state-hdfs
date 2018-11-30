@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
@@ -161,7 +162,7 @@ public class TestInjectionForSimulatedStorage {
       for(Map<DatanodeStorage, BlockListAsLongs> map : blocksList) {
         for(BlockListAsLongs blockList : map.values()) {
           for(Block b : blockList) {
-            uniqueBlocks.add(new Block(b));
+            uniqueBlocks.add(new HdfsBlock(b));
           }
         }
       }

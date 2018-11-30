@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 import org.apache.hadoop.hdfs.server.aliasmap.InMemoryAliasMap;
 import org.apache.hadoop.hdfs.server.aliasmap.InMemoryLevelDBAliasMapServer;
@@ -87,7 +88,7 @@ public class TestInMemoryLevelDBAliasMapClient {
     levelDBAliasMapServer.setConf(conf);
     levelDBAliasMapServer.start();
     inMemoryLevelDBAliasMapClient.setConf(conf);
-    Block block = new Block(42, 43, 44);
+    Block block = new HdfsBlock(42, 43, 44);
     byte[] nonce = "blackbird".getBytes();
     ProvidedStorageLocation providedStorageLocation
         = new ProvidedStorageLocation(new Path("cuckoo"),
@@ -108,8 +109,8 @@ public class TestInMemoryLevelDBAliasMapClient {
     levelDBAliasMapServer.setConf(conf);
     levelDBAliasMapServer.start();
     inMemoryLevelDBAliasMapClient.setConf(conf);
-    Block block1 = new Block(42, 43, 44);
-    Block block2 = new Block(43, 44, 45);
+    Block block1 = new HdfsBlock(42, 43, 44);
+    Block block2 = new HdfsBlock(43, 44, 45);
     byte[] nonce1 = "blackbird".getBytes();
     byte[] nonce2 = "cuckoo".getBytes();
     ProvidedStorageLocation providedStorageLocation1 =
@@ -145,12 +146,12 @@ public class TestInMemoryLevelDBAliasMapClient {
     levelDBAliasMapServer.setConf(conf);
     levelDBAliasMapServer.start();
     inMemoryLevelDBAliasMapClient.setConf(conf);
-    Block block1 = new Block(42, 43, 44);
-    Block block2 = new Block(43, 44, 45);
-    Block block3 = new Block(44, 45, 46);
-    Block block4 = new Block(47, 48, 49);
-    Block block5 = new Block(50, 51, 52);
-    Block block6 = new Block(53, 54, 55);
+    Block block1 = new HdfsBlock(42, 43, 44);
+    Block block2 = new HdfsBlock(43, 44, 45);
+    Block block3 = new HdfsBlock(44, 45, 46);
+    Block block4 = new HdfsBlock(47, 48, 49);
+    Block block5 = new HdfsBlock(50, 51, 52);
+    Block block6 = new HdfsBlock(53, 54, 55);
     byte[] nonce1 = "blackbird".getBytes();
     byte[] nonce2 = "cuckoo".getBytes();
     byte[] nonce3 = "sparrow".getBytes();
@@ -271,7 +272,7 @@ public class TestInMemoryLevelDBAliasMapClient {
   }
 
   public FileRegion generateRandomFileRegion(int seed) {
-    Block block = new Block(seed, seed + 1, seed + 2);
+    Block block = new HdfsBlock(seed, seed + 1, seed + 2);
     Path path = new Path("koekoek");
     byte[] nonce = new byte[0];
     ProvidedStorageLocation providedStorageLocation =

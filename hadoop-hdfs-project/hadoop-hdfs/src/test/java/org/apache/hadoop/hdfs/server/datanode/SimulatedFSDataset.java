@@ -47,6 +47,7 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetImplTestUt
 import org.apache.hadoop.util.AutoCloseableLock;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.BlockLocalPathInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
@@ -182,7 +183,7 @@ public class SimulatedFSDataset implements FsDatasetSpi<FsVolumeSpi> {
     private long bytesRcvd;
     private boolean pinned = false;
     BInfo(String bpid, Block b, boolean forWriting) throws IOException {
-      theBlock = new Block(b);
+      theBlock = new HdfsBlock(b);
       if (theBlock.getNumBytes() < 0) {
         theBlock.setNumBytes(0);
       }
@@ -914,7 +915,7 @@ public class SimulatedFSDataset implements FsDatasetSpi<FsVolumeSpi> {
   @Override
   @Deprecated
   public Replica getReplica(String bpid, long blockId) {
-    Block b = new Block(blockId);
+    Block b = new HdfsBlock(blockId);
     try {
       return getBlockMap(b, bpid).get(b);
     } catch (IOException ioe) {
@@ -926,7 +927,7 @@ public class SimulatedFSDataset implements FsDatasetSpi<FsVolumeSpi> {
   public synchronized String getReplicaString(String bpid, long blockId) {
     Replica r = null;
     try {
-      Block b = new Block(blockId);
+      Block b = new HdfsBlock(blockId);
       r = getBlockMap(b, bpid).get(b);
     } catch (IOException ioe) {
       // Ignore
@@ -936,13 +937,13 @@ public class SimulatedFSDataset implements FsDatasetSpi<FsVolumeSpi> {
 
   @Override // FsDatasetSpi
   public Block getStoredBlock(String bpid, long blkid) throws IOException {
-    Block b = new Block(blkid);
+    Block b = new HdfsBlock(blkid);
     try {
       BInfo binfo = getBlockMap(b, bpid).get(b);
       if (binfo == null) {
         return null;
       }
-      return new Block(blkid, binfo.getGenerationStamp(), binfo.getNumBytes());
+      return new HdfsBlock(blkid, binfo.getGenerationStamp(), binfo.getNumBytes());
     } catch (IOException ioe) {
       return null;
     }

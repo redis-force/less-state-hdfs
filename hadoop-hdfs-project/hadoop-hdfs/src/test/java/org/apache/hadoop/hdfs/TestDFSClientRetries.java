@@ -68,6 +68,7 @@ import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
 import org.apache.hadoop.hdfs.client.HdfsUtils;
 import org.apache.hadoop.hdfs.client.impl.LeaseRenewer;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ClientDatanodeProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -890,7 +891,7 @@ public class TestDFSClientRetries {
     final InetSocketAddress addr = NetUtils.getConnectAddress(server);
     DatanodeID fakeDnId = DFSTestUtil.getLocalDatanodeID(addr.getPort());
     
-    ExtendedBlock b = new ExtendedBlock("fake-pool", new Block(12345L));
+    ExtendedBlock b = new ExtendedBlock("fake-pool", new HdfsBlock(12345L));
     LocatedBlock fakeBlock = new LocatedBlock(b, new DatanodeInfo[0]);
 
     ClientDatanodeProtocol proxy = null;

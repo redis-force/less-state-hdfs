@@ -49,6 +49,7 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs.BlockReportReplica;
@@ -831,7 +832,7 @@ public abstract class BlockReportTestBase {
         }
         continue;
       }
-      newList.add(new Block(locatedBlks.get(i).getBlock().getLocalBlock()));
+      newList.add(new HdfsBlock(locatedBlks.get(i).getBlock().getLocalBlock()));
     }
     return newList;
   }

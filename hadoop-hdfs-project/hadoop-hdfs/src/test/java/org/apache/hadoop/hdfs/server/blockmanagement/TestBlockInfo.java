@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo.AddBlockResult;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeStorage;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,8 +91,8 @@ public class TestBlockInfo {
 
   @Test(expected=IllegalArgumentException.class)
   public void testAddStorageWithDifferentBlock() throws Exception {
-    BlockInfo blockInfo1 = new BlockInfoContiguous(new Block(1000L), (short) 3);
-    BlockInfo blockInfo2 = new BlockInfoContiguous(new Block(1001L), (short) 3);
+    BlockInfo blockInfo1 = new BlockInfoContiguous(new SwappableBlock(1000L), (short) 3);
+    BlockInfo blockInfo2 = new BlockInfoContiguous(new SwappableBlock(1001L), (short) 3);
 
     final DatanodeStorageInfo storage = DFSTestUtil.createDatanodeStorageInfo(
         "storageID", "127.0.0.1");

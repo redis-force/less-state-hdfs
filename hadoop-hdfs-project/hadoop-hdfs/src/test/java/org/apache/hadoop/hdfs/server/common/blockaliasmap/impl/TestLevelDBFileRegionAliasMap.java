@@ -19,6 +19,7 @@ package org.apache.hadoop.hdfs.server.common.blockaliasmap.impl;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.server.common.FileRegion;
 import org.apache.hadoop.hdfs.server.common.blockaliasmap.BlockAliasMap;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class TestLevelDBFileRegionAliasMap {
       writer.close();
 
       BlockAliasMap.Reader<FileRegion> reader = frf.getReader(opts, BPID);
-      FileRegion fr2 = reader.resolve(new Block(1, 1, 1)).get();
+      FileRegion fr2 = reader.resolve(new HdfsBlock(1, 1, 1)).get();
       assertEquals(fr, fr2);
       reader.close();
     } finally {

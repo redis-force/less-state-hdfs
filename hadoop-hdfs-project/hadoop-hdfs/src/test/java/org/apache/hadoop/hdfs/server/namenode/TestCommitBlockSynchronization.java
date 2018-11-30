@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoContiguous;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo;
@@ -94,7 +95,7 @@ public class TestCommitBlockSynchronization {
   @Test
   public void testCommitBlockSynchronization() throws IOException {
     INodeFile file = mockFileUnderConstruction();
-    Block block = new Block(blockId, length, genStamp);
+    Block block = new SwappableBlock(blockId, length, genStamp);
     FSNamesystem namesystemSpy = makeNameSystemSpy(block, file);
     DatanodeID[] newTargets = new DatanodeID[0];
 
@@ -123,7 +124,7 @@ public class TestCommitBlockSynchronization {
   @Test
   public void testCommitBlockSynchronization2() throws IOException {
     INodeFile file = mockFileUnderConstruction();
-    Block block = new Block(blockId, length, genStamp);
+    Block block = new SwappableBlock(blockId, length, genStamp);
     FSNamesystem namesystemSpy = makeNameSystemSpy(block, file);
     DatanodeID[] newTargets = new DatanodeID[0];
 
@@ -147,7 +148,7 @@ public class TestCommitBlockSynchronization {
   @Test
   public void testCommitBlockSynchronizationWithDelete() throws IOException {
     INodeFile file = mockFileUnderConstruction();
-    Block block = new Block(blockId, length, genStamp);
+    Block block = new SwappableBlock(blockId, length, genStamp);
     FSNamesystem namesystemSpy = makeNameSystemSpy(block, file);
     DatanodeID[] newTargets = new DatanodeID[0];
 
@@ -167,7 +168,7 @@ public class TestCommitBlockSynchronization {
   @Test
   public void testCommitBlockSynchronizationWithClose() throws IOException {
     INodeFile file = mockFileUnderConstruction();
-    Block block = new Block(blockId, length, genStamp);
+    Block block = new SwappableBlock(blockId, length, genStamp);
     FSNamesystem namesystemSpy = makeNameSystemSpy(block, file);
     DatanodeID[] newTargets = new DatanodeID[0];
 
@@ -195,7 +196,7 @@ public class TestCommitBlockSynchronization {
   public void testCommitBlockSynchronizationWithCloseAndNonExistantTarget()
       throws IOException {
     INodeFile file = mockFileUnderConstruction();
-    Block block = new Block(blockId, length, genStamp);
+    Block block = new SwappableBlock(blockId, length, genStamp);
     FSNamesystem namesystemSpy = makeNameSystemSpy(block, file);
     DatanodeID[] newTargets = new DatanodeID[]{
         new DatanodeID("0.0.0.0", "nonexistantHost", "1", 0, 0, 0, 0)};

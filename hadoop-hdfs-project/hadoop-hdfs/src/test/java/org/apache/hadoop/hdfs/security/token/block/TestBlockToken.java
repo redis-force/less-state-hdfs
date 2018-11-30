@@ -50,6 +50,7 @@ import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.DFSUtilClient;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ClientDatanodeProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
@@ -373,7 +374,7 @@ public class TestBlockToken {
     final InetSocketAddress addr = NetUtils.getConnectAddress(server);
     DatanodeID fakeDnId = DFSTestUtil.getLocalDatanodeID(addr.getPort());
 
-    ExtendedBlock b = new ExtendedBlock("fake-pool", new Block(12345L));
+    ExtendedBlock b = new ExtendedBlock("fake-pool", new HdfsBlock(12345L));
     LocatedBlock fakeBlock = new LocatedBlock(b, new DatanodeInfo[0]);
     fakeBlock.setBlockToken(token);
 

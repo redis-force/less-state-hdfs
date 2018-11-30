@@ -42,6 +42,7 @@ import org.apache.hadoop.hdfs.protocol.SystemErasureCodingPolicies;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocolPB.PBHelperClient;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoContiguous;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
 import org.apache.hadoop.hdfs.protocol.BlockType;
@@ -192,7 +193,7 @@ public class TestFSImage {
     long timestamp = mtime+3600;
     for (int i = 0; i < stripedBlocks.length; i++) {
       stripedBlocks[i] = new BlockInfoStriped(
-              new Block(stripedBlkId + i, preferredBlockSize, timestamp),
+              new SwappableBlock(stripedBlkId + i, preferredBlockSize, timestamp),
               testECPolicy);
       file.addBlock(stripedBlocks[i]);
     }
@@ -596,7 +597,7 @@ public class TestFSImage {
 
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoContiguous cBlk = new BlockInfoContiguous(
-          new Block(blkId, blkNumBytes, timestamp), (short)3);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), (short)3);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(cBlk);
@@ -655,7 +656,7 @@ public class TestFSImage {
 
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoContiguous cBlk = new BlockInfoContiguous(
-          new Block(blkId, blkNumBytes, timestamp), (short)3);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), (short)3);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(cBlk);
@@ -704,7 +705,7 @@ public class TestFSImage {
       Path p = new Path(testFilePath);
       DFSTestUtil.createFile(fs, p, 0, (short) 1, 1);
       BlockInfoContiguous cBlk = new BlockInfoContiguous(
-          new Block(blkId, blkNumBytes, timestamp), (short)3);
+          new SwappableBlock(blkId, blkNumBytes, timestamp), (short)3);
       INodeFile file = (INodeFile)fns.getFSDirectory().getINode(testFilePath);
       file.toUnderConstruction(clientName, clientMachine);
       file.addBlock(cBlk);

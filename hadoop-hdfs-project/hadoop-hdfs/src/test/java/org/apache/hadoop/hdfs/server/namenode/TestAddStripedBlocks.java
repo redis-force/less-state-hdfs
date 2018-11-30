@@ -34,6 +34,7 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.hdfs.protocol.LocatedStripedBlock;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoStriped;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
@@ -302,7 +303,7 @@ public class TestAddStripedBlocks {
       // the BlockInfoUCStriped is correct
       int i = 0;
       for (DataNode dn : cluster.getDataNodes()) {
-        final Block block = new Block(lastBlock.getBlockId() + i++,
+        final Block block = new SwappableBlock(lastBlock.getBlockId() + i++,
             0, lastBlock.getGenerationStamp());
         DatanodeStorage storage = new DatanodeStorage(UUID.randomUUID().toString());
         storageIDs.add(storage.getStorageID());
@@ -337,7 +338,7 @@ public class TestAddStripedBlocks {
     int i = groupSize - 1;
     for (DataNode dn : cluster.getDataNodes()) {
       String storageID = storageIDs.get(i);
-      final Block block = new Block(lastBlock.getBlockId() + i--,
+      final Block block = new SwappableBlock(lastBlock.getBlockId() + i--,
           lastBlock.getGenerationStamp(), 0);
       DatanodeStorage storage = new DatanodeStorage(storageID);
       List<ReplicaBeingWritten> blocks = new ArrayList<>();
@@ -383,7 +384,7 @@ public class TestAddStripedBlocks {
 
     // Now send a block report with correct size
     DatanodeStorage storage = new DatanodeStorage(UUID.randomUUID().toString());
-    final Block reported = new Block(stored);
+    final Block reported = new SwappableBlock(stored);
     reported.setNumBytes(numStripes * cellSize);
     StorageReceivedDeletedBlocks[] reports = DFSTestUtil
         .makeReportForReceivedBlock(reported,

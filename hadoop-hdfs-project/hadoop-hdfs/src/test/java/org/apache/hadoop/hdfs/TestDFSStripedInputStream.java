@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
@@ -174,7 +175,7 @@ public class TestDFSStripedInputStream {
     for (int bgIdx = 0; bgIdx < numBlocks; bgIdx++) {
       LocatedStripedBlock bg = (LocatedStripedBlock) (lbs.get(bgIdx));
       for (int i = 0; i < dataBlocks; i++) {
-        Block blk = new Block(bg.getBlock().getBlockId() + i,
+        Block blk = new HdfsBlock(bg.getBlock().getBlockId() + i,
             stripesPerBlock * cellSize,
             bg.getBlock().getGenerationStamp());
         blk.setGenerationStamp(bg.getBlock().getGenerationStamp());
@@ -192,7 +193,7 @@ public class TestDFSStripedInputStream {
             int posInFile = i * cellSize * dataBlocks + j * cellSize + k;
             expected[bgIdx * blockGroupSize + posInFile] =
                 SimulatedFSDataset.simulatedByte(
-                    new Block(bg.getBlock().getBlockId() + j), posInBlk);
+                    new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
           }
         }
       }
@@ -231,7 +232,7 @@ public class TestDFSStripedInputStream {
     assert lbs.get(0) instanceof LocatedStripedBlock;
     LocatedStripedBlock bg = (LocatedStripedBlock)(lbs.get(0));
     for (int i = 0; i < dataBlocks + parityBlocks; i++) {
-      Block blk = new Block(bg.getBlock().getBlockId() + i,
+      Block blk = new HdfsBlock(bg.getBlock().getBlockId() + i,
           stripesPerBlock * cellSize,
           bg.getBlock().getGenerationStamp());
       blk.setGenerationStamp(bg.getBlock().getGenerationStamp());
@@ -251,7 +252,7 @@ public class TestDFSStripedInputStream {
           int posInBlk = i * cellSize + k;
           int posInFile = i * cellSize * dataBlocks + j * cellSize + k;
           expected[posInFile] = SimulatedFSDataset.simulatedByte(
-              new Block(bg.getBlock().getBlockId() + j), posInBlk);
+              new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
         }
       }
     }
@@ -284,7 +285,7 @@ public class TestDFSStripedInputStream {
         for (int k = 0; k < cellSize; k++) {
           int posInBlk = i * cellSize + k;
           decodeInputs[j][k] = SimulatedFSDataset.simulatedByte(
-              new Block(bg.getBlock().getBlockId() + j), posInBlk);
+              new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
         }
       }
       for (int m : missingBlkIdx) {
@@ -344,7 +345,7 @@ public class TestDFSStripedInputStream {
       assert lb instanceof LocatedStripedBlock;
       LocatedStripedBlock bg = (LocatedStripedBlock)(lb);
       for (int i = 0; i < dataBlocks; i++) {
-        Block blk = new Block(bg.getBlock().getBlockId() + i,
+        Block blk = new HdfsBlock(bg.getBlock().getBlockId() + i,
             stripesPerBlock * cellSize,
             bg.getBlock().getGenerationStamp());
         blk.setGenerationStamp(bg.getBlock().getGenerationStamp());
@@ -370,7 +371,7 @@ public class TestDFSStripedInputStream {
             int posInFile = (int) bg.getStartOffset() +
                 i * cellSize * dataBlocks + j * cellSize + k;
             expected[posInFile] = SimulatedFSDataset.simulatedByte(
-                new Block(bg.getBlock().getBlockId() + j), posInBlk);
+                new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
           }
         }
       }
@@ -410,7 +411,7 @@ public class TestDFSStripedInputStream {
     assert lbs.get(0) instanceof LocatedStripedBlock;
     LocatedStripedBlock bg = (LocatedStripedBlock) (lbs.get(0));
     for (int i = 0; i < dataBlocks + parityBlocks; i++) {
-      Block blk = new Block(bg.getBlock().getBlockId() + i,
+      Block blk = new HdfsBlock(bg.getBlock().getBlockId() + i,
           stripesPerBlock * cellSize,
           bg.getBlock().getGenerationStamp());
       blk.setGenerationStamp(bg.getBlock().getGenerationStamp());
@@ -430,7 +431,7 @@ public class TestDFSStripedInputStream {
           int posInBlk = i * cellSize + k;
           int posInFile = i * cellSize * dataBlocks + j * cellSize + k;
           expected[posInFile] = SimulatedFSDataset.simulatedByte(
-              new Block(bg.getBlock().getBlockId() + j), posInBlk);
+              new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
         }
       }
     }
@@ -463,7 +464,7 @@ public class TestDFSStripedInputStream {
         for (int k = 0; k < cellSize; k++) {
           int posInBlk = i * cellSize + k;
           decodeInputs[j][k] = SimulatedFSDataset.simulatedByte(
-              new Block(bg.getBlock().getBlockId() + j), posInBlk);
+              new HdfsBlock(bg.getBlock().getBlockId() + j), posInBlk);
         }
       }
       for (int m : missingBlkIdx) {

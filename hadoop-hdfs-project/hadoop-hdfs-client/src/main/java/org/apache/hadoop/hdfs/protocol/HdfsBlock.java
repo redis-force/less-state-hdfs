@@ -8,6 +8,10 @@ public class HdfsBlock extends Block {
   public HdfsBlock() {
   }
 
+  public HdfsBlock(final long blkid) {
+    super(blkid);
+  }
+
   public HdfsBlock(Block block) {
     super(block);
   }

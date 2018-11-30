@@ -45,7 +45,7 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class TestBlockInfoStriped {
   private static final long BASE_ID = -1600;
-  private final Block baseBlock = new Block(BASE_ID);
+  private final Block baseBlock = new SwappableBlock(BASE_ID);
   private final ErasureCodingPolicy testECPolicy;
   private final int totalBlocks;
   private final BlockInfoStriped info;
@@ -65,7 +65,7 @@ public class TestBlockInfoStriped {
   private Block[] createReportedBlocks(int num) {
     Block[] blocks = new Block[num];
     for (int i = 0; i < num; i++) {
-      blocks[i] = new Block(BASE_ID + i);
+      blocks[i] = new SwappableBlock(BASE_ID + i);
     }
     return blocks;
   }
@@ -222,7 +222,7 @@ public class TestBlockInfoStriped {
 
     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(byteStream);
-    BlockInfoStriped blk = new BlockInfoStriped(new Block(blkID, numBytes,
+    BlockInfoStriped blk = new BlockInfoStriped(new SwappableBlock(blkID, numBytes,
         generationStamp), testECPolicy);
 
     try {
@@ -238,7 +238,7 @@ public class TestBlockInfoStriped {
   public void testAddStorageWithReplicatedBlock() {
     DatanodeStorageInfo storage = DFSTestUtil.createDatanodeStorageInfo(
         "storageID", "127.0.0.1");
-    BlockInfo replica = new BlockInfoContiguous(new Block(1000L), (short) 3);
+    BlockInfo replica = new BlockInfoContiguous(new SwappableBlock(1000L), (short) 3);
     info.addStorage(storage, replica);
   }
 
@@ -246,7 +246,7 @@ public class TestBlockInfoStriped {
   public void testAddStorageWithDifferentBlockGroup() {
     DatanodeStorageInfo storage = DFSTestUtil.createDatanodeStorageInfo(
         "storageID", "127.0.0.1");
-    BlockInfo diffGroup = new BlockInfoStriped(new Block(BASE_ID + 100),
+    BlockInfo diffGroup = new BlockInfoStriped(new SwappableBlock(BASE_ID + 100),
         testECPolicy);
     info.addStorage(storage, diffGroup);
   }

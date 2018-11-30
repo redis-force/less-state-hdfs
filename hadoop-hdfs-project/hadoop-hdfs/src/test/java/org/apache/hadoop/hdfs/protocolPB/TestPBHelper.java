@@ -47,6 +47,7 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.StripedFileTestUtil;
 import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockChecksumType;
 import org.apache.hadoop.hdfs.protocol.BlockType;
@@ -210,7 +211,7 @@ public class TestPBHelper {
 
   @Test
   public void testConvertBlock() {
-    Block b = new Block(1, 100, 3);
+    Block b = new HdfsBlock(1, 100, 3);
     BlockProto bProto = PBHelperClient.convert(b);
     Block b2 = PBHelperClient.convert(bProto);
     assertEquals(b, b2);
@@ -237,7 +238,7 @@ public class TestPBHelper {
         StorageType.DISK, StorageType.DISK, StorageType.DISK};
     final byte[] indices = {0, 1, 2};
     final short dataBlkNum = 6;
-    BlockWithLocations blkLocs = new BlockWithLocations(new Block(bid, 0, 1),
+    BlockWithLocations blkLocs = new BlockWithLocations(new HdfsBlock(bid, 0, 1),
         datanodeUuids, storageIDs, storageTypes);
     if (isStriped) {
       blkLocs = new StripedBlockWithLocations(blkLocs, indices, dataBlkNum,
@@ -636,7 +637,7 @@ public class TestPBHelper {
   
   @Test
   public void testConvertBlockCommand() {
-    Block[] blocks = new Block[] { new Block(21), new Block(22) };
+    Block[] blocks = new Block[] { new HdfsBlock(21), new HdfsBlock(22) };
     DatanodeInfo[][] dnInfos = new DatanodeInfo[][] { new DatanodeInfo[1],
         new DatanodeInfo[2] };
     dnInfos[0][0] = DFSTestUtil.getLocalDatanodeInfo();
