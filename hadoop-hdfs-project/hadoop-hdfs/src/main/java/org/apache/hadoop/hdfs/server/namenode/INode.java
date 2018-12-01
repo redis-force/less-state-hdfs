@@ -1081,4 +1081,6 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
    */
   public interface Feature {
   }
+
+  public abstract void flush();
 }

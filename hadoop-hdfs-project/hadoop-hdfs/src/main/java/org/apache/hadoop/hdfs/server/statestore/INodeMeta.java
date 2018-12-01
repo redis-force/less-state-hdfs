@@ -17,6 +17,8 @@ public class INodeMeta {
   public short type;
   public long parentId;
 
+  public static final int DIRTY_META = 1 << 0;
+
   public INodeMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, short type) {
     this.parentId = parentId;
     this.id = id;
@@ -26,6 +28,20 @@ public class INodeMeta {
     this.accessTime = accessTime;
     this.header = header;
     this.type = type;
+  }
+
+  public INodeMeta() {
+  }
+
+  public INodeMeta(INodeWithAdditionalFields inode, long header, short type) {
+    this.type = type;
+    this.header = header;
+    this.id = inode.getId();
+    this.name = inode.getLocalName();
+    this.permission = inode.getPermissionLong();
+    this.modificationTime = inode.getModificationTime();
+    this.accessTime = inode.getAccessTime();
+    this.parentId = inode.getParent().getId();
   }
 
   public Optional<INodeFileMeta> toFile() {

@@ -74,4 +74,10 @@ public class MockStateStore extends StateStore {
 
   public void removeFile(long fileId) {
   }
+
+  public void update(INodeFileMeta meta) {
+  }
+
+  public void update(INodeDirectoryMeta meta) {
+  }
 }
