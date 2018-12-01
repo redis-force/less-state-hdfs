@@ -4697,7 +4697,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     }
   }
 
-  PermissionStatus createFsOwnerPermissions(FsPermission permission) {
+  public PermissionStatus createFsOwnerPermissions(FsPermission permission) {
     return new PermissionStatus(fsOwner.getShortUserName(), supergroup, permission);
   }
 

@@ -111,6 +111,10 @@ public abstract class INodeWithAdditionalFields extends INode
     this.accessTime = accessTime;
   }
 
+  public static final long getPermissionStatusLong(PermissionStatus permissions) {
+    return PermissionStatusFormat.toLong(permissions);
+  }
+
   INodeWithAdditionalFields(long id, byte[] name, PermissionStatus permissions,
       long modificationTime, long accessTime) {
     this(null, id, name, PermissionStatusFormat.toLong(permissions),
@@ -204,12 +208,16 @@ public abstract class INodeWithAdditionalFields extends INode
 
   @Override
   public final short getFsPermissionShort() {
-    return PermissionStatusFormat.getMode(permission);
+    return getFsPermissionShort(permission);
   }
   @Override
   void setPermission(FsPermission permission) {
     final short mode = permission.toShort();
     updatePermissionStatus(PermissionStatusFormat.MODE, mode);
+  }
+
+  public static final short getFsPermissionShort(long permission) {
+    return PermissionStatusFormat.getMode(permission);
   }
 
   @Override

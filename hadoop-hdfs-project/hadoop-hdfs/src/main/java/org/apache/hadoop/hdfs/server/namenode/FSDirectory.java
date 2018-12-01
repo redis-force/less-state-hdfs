@@ -58,6 +58,7 @@ import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockStoragePolicySuite;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 import org.apache.hadoop.hdfs.server.namenode.INode.BlocksMapUpdateInfo.UpdatedReplicationInfo;
+import org.apache.hadoop.hdfs.server.statestore.*;
 import org.apache.hadoop.hdfs.util.ByteArray;
 import org.apache.hadoop.hdfs.util.EnumCounters;
 import org.apache.hadoop.hdfs.util.ReadOnlyList;
@@ -105,17 +106,22 @@ public class FSDirectory implements Closeable {
   static final Logger LOG = LoggerFactory.getLogger(FSDirectory.class);
 
   private static INodeDirectory createRoot(FSNamesystem namesystem) {
-    final INodeDirectory r = new INodeDirectory(
-        INodeId.ROOT_INODE_ID,
-        INodeDirectory.ROOT_NAME,
-        namesystem.createFsOwnerPermissions(new FsPermission((short) 0755)),
-        0L);
+    StateStore ss = StateStore.get();
+    INodeDirectoryMeta meta = ss.getDirectory(INodeId.ROOT_INODE_ID);
+    if (meta == null) {
+      /* create */
+      long permission = INodeWithAdditionalFields.getPermissionStatusLong(namesystem.createFsOwnerPermissions(new FsPermission((short) 0755)));
+      meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, "", permission, 0, 0);
+    }
+    final INodeDirectory r = meta.convert(namesystem);
+    /*
     r.addDirectoryWithQuotaFeature(
         new DirectoryWithQuotaFeature.Builder().
             nameSpaceQuota(DirectoryWithQuotaFeature.DEFAULT_NAMESPACE_QUOTA).
             storageSpaceQuota(DirectoryWithQuotaFeature.DEFAULT_STORAGE_SPACE_QUOTA).
             build());
     r.addSnapshottableFeature();
+    */
     r.setSnapshotQuota(0);
     return r;
   }

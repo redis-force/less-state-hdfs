@@ -220,6 +220,7 @@ public class INodesInPath {
         // reduce the inodes array to compensate for reduction in components
         inodes = Arrays.copyOf(inodes, components.length);
       } else {
+        /* HACKATHON: get child from state store */
         // normal case, and also for resolving file/dir under snapshot root
         curNode = dir.getChild(childName,
             isSnapshot ? snapshotId : CURRENT_STATE_ID);
