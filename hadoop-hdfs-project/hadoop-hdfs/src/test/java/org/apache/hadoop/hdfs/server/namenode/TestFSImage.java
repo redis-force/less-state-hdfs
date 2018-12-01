@@ -32,7 +32,7 @@ import java.io.DataInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.EnumSet;
+import java.util.*;
 
 import org.apache.hadoop.hdfs.StripedFileTestUtil;
 import org.apache.hadoop.hdfs.protocol.AddErasureCodingPolicyResponse;
@@ -183,7 +183,7 @@ public class TestFSImage {
     byte erasureCodingPolicyID = testECPolicy.getId();
     long preferredBlockSize = 128*1024*1024;
     INodeFile file = new INodeFile(id, name, permissionStatus, mtime, atime,
-        blocks, null, erasureCodingPolicyID, preferredBlockSize,
+        Optional.of(blocks), null, erasureCodingPolicyID, preferredBlockSize,
         (byte) 0, BlockType.STRIPED);
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
