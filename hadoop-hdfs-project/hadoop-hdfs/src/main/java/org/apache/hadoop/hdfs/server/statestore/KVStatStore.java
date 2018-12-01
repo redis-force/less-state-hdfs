@@ -12,6 +12,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.entity.ByteArrayEntity;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.PropertyNamingStrategy;
 
 import java.io.IOException;
 
@@ -37,17 +38,20 @@ public class KVStatStore extends StateStore {
         RequestBuilder builder = RequestBuilder.create(method);
         builder.setUri(url);
         if (body != null) {
-            builder.setEntity(new ByteArrayEntity(new ObjectMapper().writeValueAsBytes(body)));
+            builder.setEntity(new ByteArrayEntity(new ObjectMapper().setPropertyNamingStrategy(
+                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES).writeValueAsBytes(body)));
         }
         HttpRequest request = builder.build();
         HttpResponse response = httpClient.execute(HttpHost.create(endpoint),request);
         int statusCode = response.getStatusLine().getStatusCode();
         LOG.trace("request api " + url + "response code " + statusCode);
         if (statusCode >= 400) {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(
+                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);;
             return mapper.readValue(response.getEntity().getContent(), APIResponse.class);
         } else if (valueType != null) {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(
+                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);;
             return mapper.readValue(response.getEntity().getContent(), valueType);
         } else {
             return null;
@@ -195,6 +199,14 @@ public class KVStatStore extends StateStore {
 
     @Override
     public void setParent(long newParentId, long oldParentId, long id) {
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/directory/").append(id).append("/").append(oldParentId).append("/").append(newParentId);
+        try {
+            request(builder.toString(), "PUT", null, APIResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call delete directory api error " + e.getMessage());
+        }
     }
 
     @Override
