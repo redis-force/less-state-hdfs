@@ -113,7 +113,7 @@ public class FSDirectory implements Closeable {
       long permission = INodeWithAdditionalFields.getPermissionStatusLong(namesystem.createFsOwnerPermissions(new FsPermission((short) 0755)));
       meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, INodeDirectory.ROOT_NAME, permission, 0, 0);
     }
-    final INodeDirectory r = (INodeDirectory) meta.convert(namesystem);
+    final INodeDirectory r = (INodeDirectory) meta.convert();
     /*
     r.addDirectoryWithQuotaFeature(
         new DirectoryWithQuotaFeature.Builder().
@@ -1494,7 +1494,6 @@ public class FSDirectory implements Closeable {
       inodeMap.clear();
       addToInodeMap(rootDir);
       nameCache.reset();
-      inodeId.setCurrentValue(INodeId.LAST_RESERVED_ID);
     } finally {
       writeUnlock();
     }
@@ -1945,16 +1944,22 @@ public class FSDirectory implements Closeable {
    * Set the last allocated inode id when fsimage or editlog is loaded.
    */
   void resetLastInodeId(long newValue) throws IOException {
+    /* HACKATHON: IT SHOULDN'T BE NECESSARY */
+    /*
     try {
       inodeId.skipTo(newValue);
     } catch(IllegalStateException ise) {
       throw new IOException(ise);
     }
+    */
   }
 
   /** Should only be used for tests to reset to any value */
   void resetLastInodeIdWithoutChecking(long newValue) {
+    /* HACKATHON: IT SHOULDN'T BE NECESSARY */
+    /*
     inodeId.setCurrentValue(newValue);
+    */
   }
 
   INodeAttributes getAttributes(INodesInPath iip)

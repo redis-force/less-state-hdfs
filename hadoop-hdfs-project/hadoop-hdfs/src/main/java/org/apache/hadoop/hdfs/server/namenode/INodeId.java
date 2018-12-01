@@ -19,6 +19,7 @@ package org.apache.hadoop.hdfs.server.namenode;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.util.SequentialNumber;
+import org.apache.hadoop.hdfs.server.statestore.*;
 
 /**
  * An id which uniquely identifies an inode. Id 1 to 1000 are reserved for
@@ -27,7 +28,8 @@ import org.apache.hadoop.util.SequentialNumber;
  * backward compatibility support.
  */
 @InterfaceAudience.Private
-public class INodeId extends SequentialNumber {
+public class INodeId {
+  private long lastValue = LAST_RESERVED_ID;
   /**
    * The last reserved inode id. InodeIDs are allocated from LAST_RESERVED_ID +
    * 1.
@@ -37,6 +39,14 @@ public class INodeId extends SequentialNumber {
   public static final long INVALID_INODE_ID = -1;
 
   INodeId() {
-    super(ROOT_INODE_ID);
+  }
+
+  public long nextValue() {
+    lastValue = StateStore.get().tso();
+    return lastValue;
+  }
+
+  public long getCurrentValue() {
+    return lastValue;
   }
 }
