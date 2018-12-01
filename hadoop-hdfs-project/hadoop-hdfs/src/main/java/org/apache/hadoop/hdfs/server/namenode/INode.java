@@ -635,7 +635,7 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
 
   @VisibleForTesting
   public String toDetailString() {
-    return toString() + "(" + getObjectString() + "), " + getParentString();
+    return "id: " + getId() + ", " + toString() + ", (" + getObjectString() + "), " + getParentString();
   }
 
   /** @return the parent directory */
@@ -655,8 +655,12 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
   public final void setParent(INodeDirectory parent) {
     /* HACKATHON: Do not store here, store it with meta data */
     if (parent != null) {
-      this.parentId = parent.getId();
+      setParentId(parent.getId());
     }
+  }
+
+  public final void setParentId(long parentId) {
+    this.parentId = parentId;
   }
 
   /** Set container. */

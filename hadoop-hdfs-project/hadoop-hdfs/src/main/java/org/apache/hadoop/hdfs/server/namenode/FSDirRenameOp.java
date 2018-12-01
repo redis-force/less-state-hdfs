@@ -649,8 +649,6 @@ class FSDirRenameOp {
     }
 
     boolean removeSrc4OldRename() {
-      System.err.println("srcIIP: " + srcIIP);
-      System.err.println("dstIIP: " + dstIIP);
       final long removedSrc = fsd.removeLastINode(srcIIP);
       if (removedSrc == -1) {
         NameNode.stateChangeLog.warn("DIR* FSDirRenameOp.unprotectedRenameTo: "

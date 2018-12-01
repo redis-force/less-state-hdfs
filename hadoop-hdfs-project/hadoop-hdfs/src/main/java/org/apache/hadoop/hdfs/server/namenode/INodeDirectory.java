@@ -202,7 +202,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   int searchChildren(byte[] name) {
     /* HACKATHON: TODO FIX THIS, implement at higher level */
-    List<INode> thisChildren = new ArrayList();
+    List<INode> thisChildren = getChildren();
     return thisChildren == null? -1: Collections.binarySearch(thisChildren, name);
   }
 

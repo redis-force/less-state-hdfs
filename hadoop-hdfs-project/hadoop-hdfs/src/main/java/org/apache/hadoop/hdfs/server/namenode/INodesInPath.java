@@ -510,9 +510,9 @@ public class INodesInPath {
       for(i++; i < inodes.length && inodes[i] != null; i++) {
         final INodeDirectory parent_i = inodes[i].getParent();
         final INodeDirectory parent_i_1 = inodes[i-1].getParent();
-        if (parent_i != inodes[i-1] &&
+        if (!parent_i.equals(inodes[i-1]) &&
             (parent_i_1 == null || !parent_i_1.isSnapshottable()
-                || parent_i != parent_i_1)) {
+                || !parent_i.equals(parent_i_1))) {
           throw new AssertionError(
               "inodes[" + i + "].getParent() != inodes[" + (i-1)
               + "]\n  inodes[" + i + "]=" + inodes[i].toDetailString()

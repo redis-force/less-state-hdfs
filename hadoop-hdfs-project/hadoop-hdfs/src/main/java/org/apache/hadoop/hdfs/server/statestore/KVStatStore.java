@@ -223,7 +223,7 @@ public class KVStatStore extends StateStore {
     @Override
     public void removeDirectoryChild(long directoryId, byte[] name) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/directory/").append(directoryId).append("/").append(name.toString());
+        builder.append("/api/directory/").append(directoryId).append("/").append(new String(name, UTF_8));
         try {
             request(builder.toString(), "DELETE", null, APIResponse.class);
         } catch (IOException e) {
