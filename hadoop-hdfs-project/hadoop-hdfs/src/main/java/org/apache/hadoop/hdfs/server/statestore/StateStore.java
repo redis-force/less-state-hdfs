@@ -39,7 +39,11 @@ public abstract class StateStore {
   public abstract void update(INodeFileMeta meta);
   public abstract void update(INodeDirectoryMeta meta);
 
-  private static StateStore STORE = new MockStateStore();
+  private static volatile StateStore STORE;
+
+  public static void init(String endpoint) {
+    STORE = new KVStatStore(endpoint);
+  }
 
   public static StateStore get() {
     return STORE;
