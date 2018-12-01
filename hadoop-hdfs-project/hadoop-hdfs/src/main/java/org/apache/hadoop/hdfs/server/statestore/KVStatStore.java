@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.entity.ByteArrayEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -23,15 +24,14 @@ public class KVStatStore extends StateStore {
         INodeMeta[] response;
     }
 
-    private<T> Object request(String url, String method, Object body, Class<T> valueType) throws IOException {
-        RequestBuilder builder =  RequestBuilder.create(method);
+    private <T> Object request(String url, String method, Object body, Class<T> valueType) throws IOException {
+        RequestBuilder builder = RequestBuilder.create(method);
         builder.setUri(url);
         if (body != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValueAsString(body);
+            builder.setEntity(new ByteArrayEntity(new ObjectMapper().writeValueAsBytes(body)));
         }
         HttpRequest request = builder.build();
-        HttpResponse response = httpClient.execute(HttpHost.create(API_SERVER_HOST),request);
+        HttpResponse response = httpClient.execute(HttpHost.create(API_SERVER_HOST), request);
         int statusCode = response.getStatusLine().getStatusCode();
         LOG.trace("request api " + url + "response code " + statusCode);
         if (statusCode >= 400) {
@@ -46,7 +46,7 @@ public class KVStatStore extends StateStore {
     }
 
     public long tso() {
-        long[] ts =tso(1);
+        long[] ts = tso(1);
         if (ts == null) {
             return -1;
         }
@@ -59,7 +59,7 @@ public class KVStatStore extends StateStore {
         builder.append(size);
         TS ts = null;
         try {
-            ts = (TS)request(builder.toString(), "GET", null, TS.class);
+            ts = (TS) request(builder.toString(), "GET", null, TS.class);
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("call tso api error " + e.getMessage());
@@ -71,19 +71,19 @@ public class KVStatStore extends StateStore {
     }
 
     public INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header) {
-       StringBuffer builder = new StringBuffer();
-       builder.append("/api/file/").append(id);
-       INodeFileMeta meta = new INodeFileMeta(parent, id, name, permission, modificationTime, accessTime, header);
-       try {
-           request(builder.toString(), "PUT", meta, APIResponse.class);
-       } catch (IOException e) {
-           e.printStackTrace();
-           LOG.error("call create file api error " +  e.getMessage());
-       }
-       return meta;
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/file/").append(id);
+        INodeFileMeta meta = new INodeFileMeta(parent, id, name, permission, modificationTime, accessTime, header);
+        try {
+            request(builder.toString(), "PUT", meta, APIResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call create file api error " + e.getMessage());
+        }
+        return meta;
     }
 
-    public INodeDirectoryMeta mkdir(long parent, long id,  byte[] name, long permission, long modificationTime, long accessTime) {
+    public INodeDirectoryMeta mkdir(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime) {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/directory/").append(id);
         INodeDirectoryMeta meta = new INodeDirectoryMeta(parent, id, name, permission, modificationTime, accessTime);
@@ -91,7 +91,7 @@ public class KVStatStore extends StateStore {
             request(builder.toString(), "PUT", meta, APIResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call create file api error " +  e.getMessage());
+            LOG.error("call create file api error " + e.getMessage());
         }
         return meta;
     }
@@ -100,28 +100,25 @@ public class KVStatStore extends StateStore {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/directory/").append(directoryId).append("/").append(name.toString());
         try {
-            return (INodeMeta)request(builder.toString(), "GET", null, INodeMeta.class);
-        }catch (IOException e) {
+            return (INodeMeta) request(builder.toString(), "GET", null, INodeMeta.class);
+        } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call get directory child api error "+ e.getMessage());
+            LOG.error("call get directory child api error " + e.getMessage());
             return null;
         }
     }
-
-
-
+    
     public INodeMeta[] getDirectoryChildren(long directoryId) {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/directory-children/").append(directoryId).append("/");
         try {
-            INodeChildren children =  (INodeChildren)request(builder.toString(), "GET", null, INodeChildren.class);
+            INodeChildren children = (INodeChildren) request(builder.toString(), "GET", null, INodeChildren.class);
             return children.response;
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call get directory child api error "+ e.getMessage());
+            LOG.error("call get directory child api error " + e.getMessage());
             return null;
         }
-        return null;
     }
 
     public INodeFileMeta getFile(long fileId) {
@@ -131,7 +128,7 @@ public class KVStatStore extends StateStore {
             return (INodeFileMeta) request(builder.toString(), "GET", null, INodeFileMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call create file api error " +  e.getMessage());
+            LOG.error("call create file api error " + e.getMessage());
         }
         return null;
     }
@@ -143,7 +140,7 @@ public class KVStatStore extends StateStore {
             return (INodeDirectoryMeta) request(builder.toString(), "GET", null, INodeDirectoryMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call create file api error " +  e.getMessage());
+            LOG.error("call create file api error " + e.getMessage());
         }
         return null;
     }
@@ -155,7 +152,7 @@ public class KVStatStore extends StateStore {
             return (BlockMeta) request(builder.toString(), "GET", null, BlockMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call create file api error " +  e.getMessage());
+            LOG.error("call create file api error " + e.getMessage());
         }
         return null;
     }
@@ -199,7 +196,7 @@ public class KVStatStore extends StateStore {
             request(builder.toString(), "DELETE", null, APIResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call delete directory api error " +  e.getMessage());
+            LOG.error("call delete directory api error " + e.getMessage());
         }
     }
 
@@ -211,7 +208,7 @@ public class KVStatStore extends StateStore {
             request(builder.toString(), "DELETE", null, APIResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call delete directory api error " +  e.getMessage());
+            LOG.error("call delete directory api error " + e.getMessage());
         }
     }
 
@@ -223,7 +220,7 @@ public class KVStatStore extends StateStore {
             request(builder.toString(), "DELETE", null, APIResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("call delete file api error " +  e.getMessage());
+            LOG.error("call delete file api error " + e.getMessage());
         }
     }
 }
