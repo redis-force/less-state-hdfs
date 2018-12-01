@@ -19,6 +19,15 @@ public class KVStatStore extends StateStore {
     static final Log LOG = LogFactory.getLog(Balancer.class);
     private static String API_SERVER_HOST = "http://127.0.0.1:8089";
     private HttpClient httpClient = new DefaultHttpClient();
+    private String endpoint;
+
+    public KVStatStore(String endpoint) {
+      this.endpoint = endpoint;
+    }
+
+    public KVStatStore() {
+      this(API_SERVER_HOST);
+    }
 
     class INodeChildren {
         INodeMeta[] response;
@@ -31,7 +40,7 @@ public class KVStatStore extends StateStore {
             builder.setEntity(new ByteArrayEntity(new ObjectMapper().writeValueAsBytes(body)));
         }
         HttpRequest request = builder.build();
-        HttpResponse response = httpClient.execute(HttpHost.create(API_SERVER_HOST), request);
+        HttpResponse response = httpClient.execute(HttpHost.create(endpoint),request);
         int statusCode = response.getStatusLine().getStatusCode();
         LOG.trace("request api " + url + "response code " + statusCode);
         if (statusCode >= 400) {
@@ -222,5 +231,13 @@ public class KVStatStore extends StateStore {
             e.printStackTrace();
             LOG.error("call delete file api error " + e.getMessage());
         }
+    }
+
+    @Override
+    public void update(INodeFileMeta meta) {
+    }
+
+    @Override
+    public void update(INodeDirectoryMeta meta) {
     }
 }

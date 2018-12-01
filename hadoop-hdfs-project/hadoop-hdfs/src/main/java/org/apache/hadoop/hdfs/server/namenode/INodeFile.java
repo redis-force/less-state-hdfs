@@ -49,6 +49,7 @@ import org.apache.hadoop.hdfs.server.namenode.snapshot.FileDiffList;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.FileWithSnapshotFeature;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.DiffList;
+import org.apache.hadoop.hdfs.server.statestore.*;
 import org.apache.hadoop.hdfs.util.LongBitFormat;
 import org.apache.hadoop.util.StringUtils;
 import static org.apache.hadoop.io.erasurecode.ErasureCodeConstants.REPLICATION_POLICY_ID;
@@ -244,9 +245,8 @@ public class INodeFile extends INodeWithAdditionalFields
 
   }
 
-  private long header = 0L;
-
   private Optional<BlockInfo[]> blocks;
+  private boolean dirty = false;
 
   public INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
             long atime, Optional<BlockInfo[]> blklist, short replication,
@@ -261,8 +261,8 @@ public class INodeFile extends INodeWithAdditionalFields
     super(id, name, permissions, mtime, atime);
     final long layoutRedundancy = HeaderFormat.getBlockLayoutRedundancy(
         blockType, replication, ecPolicyID);
-    header = HeaderFormat.toLong(preferredBlockSize, layoutRedundancy,
-        storagePolicyID);
+    this.setHeader(HeaderFormat.toLong(preferredBlockSize, layoutRedundancy,
+        storagePolicyID));
     BlockInfo[] realBlkList = blklist.orElse(BlockInfo.EMPTY_ARRAY);
     if (realBlkList.length > 0) {
       for (BlockInfo b : realBlkList) {
@@ -274,7 +274,7 @@ public class INodeFile extends INodeWithAdditionalFields
   
   public INodeFile(INodeFile that) {
     super(that);
-    this.header = that.header;
+    setHeader(that.header);
     this.features = that.features;
     setBlocks(that.blocks);
   }
@@ -555,8 +555,8 @@ public class INodeFile extends INodeWithAdditionalFields
         HeaderFormat.BLOCK_LAYOUT_AND_REDUNDANCY.BITS.retrieve(header);
     layoutRedundancy = (layoutRedundancy &
         ~HeaderFormat.MAX_REDUNDANCY) | replication;
-    header = HeaderFormat.BLOCK_LAYOUT_AND_REDUNDANCY.BITS.
-        combine(layoutRedundancy, header);
+    setHeader(HeaderFormat.BLOCK_LAYOUT_AND_REDUNDANCY.BITS.
+        combine(layoutRedundancy, header));
   }
 
   /** Set the replication factor of this file. */
@@ -605,8 +605,8 @@ public class INodeFile extends INodeWithAdditionalFields
   }
 
   private void setStoragePolicyID(byte storagePolicyId) {
-    header = HeaderFormat.STORAGE_POLICY_ID.BITS.combine(storagePolicyId,
-        header);
+    setHeader(HeaderFormat.STORAGE_POLICY_ID.BITS.combine(storagePolicyId,
+        header));
   }
 
   public final void setStoragePolicyID(byte storagePolicyId,
@@ -1231,5 +1231,10 @@ public class INodeFile extends INodeWithAdditionalFields
 
   public static long getPreferredBlockSize(long header) {
     return HeaderFormat.getPreferredBlockSize(header);
+  }
+
+  public void flush() {
+    /* HACKATHON: check under construction */
+    StateStore.get().update(new INodeFileMeta(this, (super.isDirty() ? INodeFileMeta.DIRTY_META : 0) | (dirty ? INodeFileMeta.DIRTY_BLOCKS : 0)));
   }
 }

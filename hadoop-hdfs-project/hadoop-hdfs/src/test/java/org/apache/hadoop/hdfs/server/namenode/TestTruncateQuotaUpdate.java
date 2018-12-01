@@ -32,7 +32,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.internal.util.reflection.Whitebox;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -146,7 +146,7 @@ public class TestTruncateQuotaUpdate {
         .createImmutable((short) 0x1ff));
     return new INodeFile(
         ++nextMockINodeId, new byte[0], perm, 0, 0,
-        blocks.toArray(new BlockInfo[blocks.size()]), replication,
+        Optional.of(blocks.toArray(new BlockInfo[blocks.size()])), replication,
         BLOCKSIZE);
   }
 

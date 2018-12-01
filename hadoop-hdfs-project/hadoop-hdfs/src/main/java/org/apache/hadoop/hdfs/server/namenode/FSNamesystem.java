@@ -102,6 +102,7 @@ import org.apache.hadoop.hdfs.protocol.SnapshotDiffReportListing;
 import org.apache.hadoop.hdfs.protocol.SnapshotDiffReport;
 import org.apache.hadoop.hdfs.server.namenode.metrics.ReplicatedBlocksMBean;
 import org.apache.hadoop.hdfs.server.protocol.SlowDiskReports;
+import org.apache.hadoop.hdfs.server.statestore.*;
 import static org.apache.hadoop.util.Time.now;
 import static org.apache.hadoop.util.Time.monotonicNow;
 import static org.apache.hadoop.hdfs.server.namenode.top.metrics.TopMetrics.TOPMETRICS_METRICS_SOURCE_NAME;
@@ -908,6 +909,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
       if (!INSTANCE.compareAndSet(null, this)) {
           throw new RuntimeException("FSNamesystem is initialized multiple times");
       }
+      StateStore.init(conf.get("stateserver.endpoint", "192.168.195.31:8089"));
     } catch(IOException e) {
       LOG.error(getClass().getSimpleName() + " initialization failed.", e);
       close();
