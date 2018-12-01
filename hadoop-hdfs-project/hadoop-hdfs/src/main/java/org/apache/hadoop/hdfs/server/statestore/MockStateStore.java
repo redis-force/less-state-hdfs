@@ -2,7 +2,7 @@ package org.apache.hadoop.hdfs.server.statestore;
 
 import java.util.concurrent.atomic.*;
 
-public class MockStateStore implements StateStore {
+public class MockStateStore extends StateStore {
   private static AtomicLong current = new AtomicLong(1024*1024); /* in case conflict with some default magic number */
   public long tso() {
     return current.incrementAndGet();
