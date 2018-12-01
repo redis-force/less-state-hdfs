@@ -2,6 +2,8 @@ package org.apache.hadoop.hdfs.server.statestore;
 
 import java.util.concurrent.atomic.*;
 
+import org.apache.hadoop.hdfs.server.blockmanagement.*;
+
 public class MockStateStore extends StateStore {
   private static AtomicLong current = new AtomicLong(1024*1024); /* in case conflict with some default magic number */
   public long tso() {
@@ -46,5 +48,30 @@ public class MockStateStore extends StateStore {
 
   public BlockMeta addBlock(long fileId, long blockId, long generationTimestamp) {
     return null;
+  }
+  
+  public BlockMeta[] updateBlocks(long fileId, BlockInfo[] blocks) {
+    return null;
+  }
+
+  public void truncateBlocks(long fileId, int size) {
+    return;
+  }
+
+  public BlockMeta updateBlock(long fileId, int atIndex, BlockInfo block) {
+    return null;
+  }
+
+  public void setParent(long newParentId, long oldParentId, long id) {
+    return;
+  }
+
+  public void removeDirectoryChild(long directoryId, byte[] name) {
+  }
+
+  public void removeDirectory(long directoryId) {
+  }
+
+  public void removeFile(long fileId) {
   }
 }

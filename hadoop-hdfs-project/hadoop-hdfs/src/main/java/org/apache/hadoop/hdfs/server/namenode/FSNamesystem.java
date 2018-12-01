@@ -141,6 +141,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.*;
 
 import javax.annotation.Nonnull;
 import javax.management.NotCompliantMBeanException;
@@ -904,6 +905,9 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
           DFSConfigKeys.DFS_NAMENODE_LIST_OPENFILES_NUM_RESPONSES +
               " must be a positive integer."
       );
+      if (!INSTANCE.compareAndSet(null, this)) {
+          throw new RuntimeException("FSNamesystem is initialized multiple times");
+      }
     } catch(IOException e) {
       LOG.error(getClass().getSimpleName() + " initialization failed.", e);
       close();
@@ -913,6 +917,12 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
       close();
       throw re;
     }
+  }
+
+  private static AtomicReference<FSNamesystem> INSTANCE = new AtomicReference();
+
+  public static FSNamesystem get() {
+    return INSTANCE.get();
   }
 
   @VisibleForTesting
