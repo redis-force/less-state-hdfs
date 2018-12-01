@@ -292,9 +292,9 @@ public class KVStatStore extends StateStore {
     }
 
     @Override
-    public void addBlockStorage(String id, String dataNodeId, String storageId) {
+    public void addBlockStorage(long id, String dataNodeId, String storageId) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/block/storage/").append(dataNodeId).append("/").append(storageId);
+        builder.append("/api/block/storage/").append(id).append("/").append(dataNodeId).append("/").append(storageId);
         try {
             request(builder.toString(), "PUT", null, APIResponse.class);
         } catch (IOException e) {
