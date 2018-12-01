@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.PropertyNamingStrategy;
 
 import java.io.IOException;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class KVStatStore extends StateStore {
     static final Log LOG = LogFactory.getLog(Balancer.class);
@@ -44,16 +45,20 @@ public class KVStatStore extends StateStore {
         HttpRequest request = builder.build();
         HttpResponse response = httpClient.execute(HttpHost.create(endpoint),request);
         int statusCode = response.getStatusLine().getStatusCode();
-        LOG.trace("request api " + url + "response code " + statusCode);
-        if (statusCode >= 400) {
+        LOG.trace("request api " + url + " response code " + statusCode);
+        if (statusCode == 404) {
+            response.getEntity().consumeContent();
+            return null;
+        } else if (statusCode >= 400) {
             ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(
-                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);;
+                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
             return mapper.readValue(response.getEntity().getContent(), APIResponse.class);
-        } else if (valueType != null) {
+        } else if (valueType != null && valueType != APIResponse.class) {
             ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(
-                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);;
+                    PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
             return mapper.readValue(response.getEntity().getContent(), valueType);
         } else {
+            response.getEntity().consumeContent();
             return null;
         }
     }
@@ -83,10 +88,9 @@ public class KVStatStore extends StateStore {
         return ts.timestamp;
     }
 
-    public INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header) {
+    public INodeFileMeta createFile(INodeFileMeta meta) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/file/").append(id);
-        INodeFileMeta meta = new INodeFileMeta(parent, id, name, permission, modificationTime, accessTime, header);
+        builder.append("/api/file/").append(meta.id);
         try {
             request(builder.toString(), "PUT", meta, APIResponse.class);
         } catch (IOException e) {
@@ -96,10 +100,17 @@ public class KVStatStore extends StateStore {
         return meta;
     }
 
+    public INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine) {
+        return createFile(new INodeFileMeta(parent, id, name, permission, modificationTime, accessTime, header, clientName, clientMachine));
+    }
+
     public INodeDirectoryMeta mkdir(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime) {
+        return mkdir(new INodeDirectoryMeta(parent, id, name, permission, modificationTime, accessTime));
+    }
+
+    public INodeDirectoryMeta mkdir(INodeDirectoryMeta meta) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/directory/").append(id);
-        INodeDirectoryMeta meta = new INodeDirectoryMeta(parent, id, name, permission, modificationTime, accessTime);
+        builder.append("/api/directory/").append(meta.id);
         try {
             request(builder.toString(), "PUT", meta, APIResponse.class);
         } catch (IOException e) {
@@ -111,7 +122,7 @@ public class KVStatStore extends StateStore {
 
     public INodeMeta getDirectoryChild(long directoryId, byte[] name) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/directory/").append(directoryId).append("/").append(name.toString());
+        builder.append("/api/directory/").append(directoryId).append("/").append(new String(name, UTF_8));
         try {
             return (INodeMeta) request(builder.toString(), "GET", null, INodeMeta.class);
         } catch (IOException e) {
@@ -198,9 +209,9 @@ public class KVStatStore extends StateStore {
     }
 
     @Override
-    public void setParent(long newParentId, long oldParentId, long id) {
+    public void rename(long oldParentId, INodeMeta node) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/directory/").append(id).append("/").append(oldParentId).append("/").append(newParentId);
+        builder.append("/api/directory/").append(node.id).append("/").append(oldParentId).append("/").append(node.parentId);
         try {
             request(builder.toString(), "PUT", null, APIResponse.class);
         } catch (IOException e) {

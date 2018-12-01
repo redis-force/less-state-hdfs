@@ -322,7 +322,7 @@ public class INodeFile extends INodeWithAdditionalFields
     return getFileUnderConstructionFeature() != null;
   }
 
-  INodeFile toUnderConstruction(String clientName, String clientMachine) {
+  public INodeFile toUnderConstruction(String clientName, String clientMachine) {
     Preconditions.checkState(!isUnderConstruction(),
         "file is already under construction");
     FileUnderConstructionFeature uc = new FileUnderConstructionFeature(

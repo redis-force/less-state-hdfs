@@ -23,26 +23,32 @@ public class INodeFileMeta extends INodeMeta {
   public INodeFileMeta() {
   }
 
-  public INodeFileMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header) {
+  public INodeFileMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine) {
     super(parentId, id, name, permission, modificationTime, accessTime, header, TYPE);
     this.blocks = EMPTY;
-  }
-
-  public INodeFileMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine) {
-    this(parentId, id, name, permission, modificationTime, accessTime, header);
     this.clientName = clientName;
     this.clientMachine = clientMachine;
   }
 
   public INodeFileMeta(INodeFile file, int flags) {
     super(file, file.getHeaderLong(), TYPE);
+    FileUnderConstructionFeature feature = file.getFileUnderConstructionFeature();
+    if (feature != null) {
+      flags |= DIRTY_UNDER_CONSTRUCTION;
+      clientName = feature.getClientName();
+      clientMachine = feature.getClientMachine();
+    }
     this.dirtyFlags = flags;
   }
 
+  public INodeFileMeta(INodeFile file) {
+    this(file, 0x7FFFFFFF);
+  }
+
   public static INodeFile convert(INodeMeta meta, PermissionStatus ps) {
-    Optional<BlockInfo[]> blocks = (meta instanceof INodeFileMeta && ((INodeFileMeta) meta).blocks != EMPTY) ?
-      Optional.of(BlockMeta.convert(((INodeFileMeta) meta).blocks)) : Optional.empty();
-    return new INodeFile(meta.id,
+    INodeFileMeta fileMeta = (INodeFileMeta) meta;
+    Optional<BlockInfo[]> blocks = fileMeta.blocks != EMPTY ? Optional.of(BlockMeta.convert(fileMeta.blocks)) : Optional.empty();
+    INodeFile file = new INodeFile(meta.id,
         DFSUtil.string2Bytes(meta.name),
         ps,
         meta.modificationTime,
@@ -50,5 +56,9 @@ public class INodeFileMeta extends INodeMeta {
         blocks,
         INodeFile.getReplication(meta.header),
         INodeFile.getPreferredBlockSize(meta.header));
+    if (fileMeta.clientName != null || !fileMeta.clientName.isEmpty()) {
+      file = file.toUnderConstruction(fileMeta.clientName, fileMeta.clientMachine);
+    }
+    return file;
   }
 }

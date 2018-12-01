@@ -444,8 +444,9 @@ class FSDirWriteFileOp {
             storagePolicyId, blockType);
       }
       newNode.setLocalName(localName);
-      INodesInPath iip = fsd.addINode(existing, newNode,
-          permissions.getPermission());
+      INodesInPath iip = null;
+      /* fsd.addINode(existing, newNode,
+          permissions.getPermission()); */
       if (iip != null) {
         if (aclEntries != null) {
           AclStorage.updateINodeAcl(newNode, aclEntries, CURRENT_STATE_ID);
