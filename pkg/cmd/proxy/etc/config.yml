@@ -1,0 +1,3 @@
+proxy:
+    tivk.pd-address: "pd0:2379"
+    server.host-port: ":8089"
