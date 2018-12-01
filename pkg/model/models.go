@@ -9,7 +9,8 @@ type APIResponse struct {
 
 //TS timestamp
 type TS struct {
-	Timestamp uint64 `json:"timestamp"`
+	Timestamp []uint64 `json:"timestamp"`
+	Count     int      `jons:"count"`
 }
 
 //Block hdfs file block

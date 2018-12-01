@@ -19,6 +19,10 @@ message BlockStorage {
     repeated BlockStorageNode nodes = 1;
 };
 
+message INodeID {
+    int64 id = 1;
+}
+
 message INodeMeta {
     int64 id = 1;
     string name = 2;

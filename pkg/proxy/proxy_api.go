@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pingcap/tidb/kv"
+	"github.com/pingcap/tidb/store/tikv/oracle"
 	"github.com/redis-force/less-state-hdfs/pkg/model"
 	pb "github.com/redis-force/less-state-hdfs/pkg/proto"
 )
@@ -119,12 +120,31 @@ func apiResponseSuccess(c *gin.Context, resp interface{}) {
 }
 
 func (s *apiServer) ts(c *gin.Context) {
-	tm, err := s.proxy.oracle.GetTimestamp(c.Request.Context())
+	count, err := strconv.Atoi(c.DefaultQuery("count", "1"))
 	if err != nil {
-		apiResponseError(c, http.StatusInternalServerError, err)
+		apiResponseError(c, http.StatusBadRequest, err)
 		return
 	}
-	apiResponseSuccess(c, model.TS{Timestamp: tm})
+	if count <= 0 {
+		apiResponseError(c, http.StatusBadRequest, fmt.Errorf("count should not less than 1"))
+		return
+	}
+	ts := model.TS{
+		Timestamp: make([]uint64, count),
+		Count:     count,
+	}
+	fs := make([]oracle.Future, count)
+	for i := 0; i < count; i++ {
+		fs[i] = s.proxy.oracle.GetTimestampAsync(c.Request.Context())
+	}
+	for i := 0; i < count; i++ {
+		ts.Timestamp[i], err = fs[i].Wait()
+		if err != nil {
+			apiResponseError(c, http.StatusInternalServerError, err)
+			return
+		}
+	}
+	apiResponseSuccess(c, ts)
 }
 
 func (s *apiServer) getBlock(c *gin.Context) {
@@ -253,7 +273,7 @@ func (s *apiServer) getINodeDirectory(c *gin.Context) {
 	id := c.Keys["id"].(int64)
 	m, err := s.proxy.GetINodeDirectory(c.Request.Context(), id)
 	if kv.ErrNotExist.Equal(err) {
-		apiResponseError(c, http.StatusNotFound, fmt.Errorf("inode-file id=%d not found", id))
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("inode-directory id=%d not found", id))
 		return
 	}
 	if err != nil {
@@ -285,18 +305,67 @@ func (s *apiServer) putINodeDirectory(c *gin.Context) {
 
 //deleteINodeDirectory param id
 func (s *apiServer) deleteINodeDirectory(c *gin.Context) {
+	name := c.Param("name")
+	if len(name) == 0 {
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("param name must not be empty"))
+		return
+	}
 }
 
 //getINodeDirectory param id/name
 func (s *apiServer) getINodeDirectoryChild(c *gin.Context) {
-
+	name := c.Param("name")
+	if len(name) == 0 {
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("param name must not be empty"))
+		return
+	}
+	id := c.Keys["id"].(int64)
+	_, needMore := c.GetQuery("need_more")
+	im, err := s.proxy.GetINodeDirectoryChild(c.Request.Context(), id, name, needMore)
+	if kv.ErrNotExist.Equal(err) {
+		apiResponseError(c, http.StatusNotFound, err)
+		return
+	}
+	if err != nil {
+		apiResponseError(c, http.StatusInternalServerError, err)
+		return
+	}
+	apiResponseSuccess(c, im)
 }
 
 //putINodeDirectory param id/name
 func (s *apiServer) putINodeDirectoryChild(c *gin.Context) {
-
+	name := c.Param("name")
+	if len(name) == 0 {
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("param name must not be empty"))
+		return
+	}
+	bm := new(pb.INodeMeta)
+	err := c.ShouldBindJSON(bm)
+	if err != nil {
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("param post body err %s", err))
+		return
+	}
+	bm.Id = c.Keys["id"].(int64)
+	bm.Name = name
+	if err := s.proxy.PutINodeDirectoryChild(c.Request.Context(), bm); err != nil {
+		apiResponseError(c, http.StatusInternalServerError, err)
+		return
+	}
+	apiResponseSuccess(c, nil)
 }
 
 //deleteINodeDirectory param id/name
 func (s *apiServer) deleteINodeDirectoryChild(c *gin.Context) {
+	name := c.Param("name")
+	if len(name) == 0 {
+		apiResponseError(c, http.StatusNotFound, fmt.Errorf("param name must not be empty"))
+		return
+	}
+	id := c.Keys["id"].(int64)
+	if err := s.proxy.DeleteINodeDirectoryChild(c.Request.Context(), id, name); err != nil {
+		apiResponseError(c, http.StatusInternalServerError, err)
+		return
+	}
+	apiResponseSuccess(c, nil)
 }
