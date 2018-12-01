@@ -219,7 +219,7 @@ public class KVStatStore extends StateStore {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/file/").append(fileId).append("/").append(block.id);
         try {
-            return (BlockMeta)request(builder.toString(), "PUT", block, BlockMeta.class);
+            return (BlockMeta)request(builder.toString(), "POST", block, BlockMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
             LOG.error("call add file block api error " + e.getMessage());
@@ -289,5 +289,17 @@ public class KVStatStore extends StateStore {
 
     @Override
     public void update(INodeDirectoryMeta meta) {
+    }
+
+    @Override
+    public void addBlockStorage(String id, String dataNodeId, String storageId) {
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/block/storage/").append(dataNodeId).append("/").append(storageId);
+        try {
+            request(builder.toString(), "PUT", null, APIResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call update file api error " + e.getMessage());
+        }
     }
 }

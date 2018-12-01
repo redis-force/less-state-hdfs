@@ -241,8 +241,18 @@ func (s *apiServer) getBlockStorage(c *gin.Context) {
 
 //putBlock param id/data_node_id/storage_id
 func (s *apiServer) putBlockStorage(c *gin.Context) {
-	//TODO get block meta
-	apiResponseSuccess(c, nil)
+	id := c.GetInt64("id")
+	dataNodeID := c.Param(("data_node_id"))
+	storageID := c.Param("storage_id")
+	if len(dataNodeID) == 0 || len(storageID) == 0 {
+		apiResponseError(c, http.StatusBadRequest, fmt.Errorf("data/storage id param error"))
+		return
+	}
+	if err := s.proxy.AddBlockStorage(c.Request.Context(), id, dataNodeID, storageID); err != nil {
+		apiResponseError(c, http.StatusInternalServerError, err)
+		return
+	}
+	apiResponseSuccess(c, model.APIResponse{})
 }
 
 //deleteBlock param id/data_node_id/storage_id
@@ -352,6 +362,7 @@ func (s *apiServer) updateINodeFileBlock(c *gin.Context) {
 		apiResponseError(c, http.StatusBadRequest, err)
 		return
 	}
+	block.Replication = 1
 	if err := s.proxy.UpdateINodeFileBlock(c.Request.Context(), id, blockID, block); err != nil {
 		apiResponseError(c, http.StatusInternalServerError, err)
 		return

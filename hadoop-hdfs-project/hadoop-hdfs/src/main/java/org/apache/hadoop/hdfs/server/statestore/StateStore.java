@@ -49,7 +49,11 @@ public abstract class StateStore {
     STORE = new KVStatStore(endpoint);
   }
 
+  public void addBlockStorage(String id, String dataNodeId, String StorageId) {}
+
   public static StateStore get() {
     return STORE;
   }
+
+
 }

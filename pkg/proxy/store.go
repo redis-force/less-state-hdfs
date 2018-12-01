@@ -99,7 +99,27 @@ func (s *Proxy) DeleteBlock(ctx context.Context, id int64) error {
 func (s *Proxy) GetBlockStorage(ctx context.Context, id int64) *pb.BlockStorage {
 	return nil
 }
-func (s *Proxy) AddBlockStorage(ctx context.Context, id int64) *pb.BlockStorage {
+func (s *Proxy) AddBlockStorage(ctx context.Context, id int64, nodeID, storageID string) error {
+	tx, err := s.store.Begin()
+	if err != nil {
+		return err
+	}
+	bs := new(pb.BlockStorage)
+	if err = s.transGet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
+		return err
+	}
+	for _, b := range bs.Nodes {
+		if b.GetDataNodeId() == nodeID && b.GetStorageId() == storageID {
+			return nil
+		}
+	}
+	bs.Nodes = append(bs.Nodes, &pb.BlockStorageNode{
+		StorageId:  proto.String(storageID),
+		DataNodeId: proto.String(nodeID),
+	})
+	if err = s.transSet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
+		return err
+	}
 	return nil
 }
 func (s *Proxy) DeleteBlockStorage(ctx context.Context, id int64) *pb.BlockStorage {
