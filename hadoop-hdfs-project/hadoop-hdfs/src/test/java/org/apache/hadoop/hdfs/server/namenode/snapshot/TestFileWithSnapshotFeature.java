@@ -20,6 +20,7 @@ package org.apache.hadoop.hdfs.server.namenode.snapshot;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockStoragePolicy;
+import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfoContiguous;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
@@ -52,7 +53,7 @@ public class TestFileWithSnapshotFeature {
     BlockStoragePolicySuite bsps = mock(BlockStoragePolicySuite.class);
     BlockStoragePolicy bsp = mock(BlockStoragePolicy.class);
     BlockInfo[] blocks = new BlockInfo[] {
-        new BlockInfoContiguous(new Block(1, BLOCK_SIZE, 1), REPL_1)
+        new BlockInfoContiguous(new SwappableBlock(1, BLOCK_SIZE, 1), REPL_1)
     };
     BlockManager bm = mock(BlockManager.class);
 

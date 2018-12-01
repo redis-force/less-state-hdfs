@@ -95,7 +95,7 @@ public class TestHeartbeatHandling {
         synchronized(hm) {
           for (int i=0; i<MAX_REPLICATE_BLOCKS; i++) {
             dd.addBlockToBeReplicated(
-                new Block(i, 0, GenerationStamp.LAST_RESERVED_STAMP),
+                new SwappableBlock(i, 0, GenerationStamp.LAST_RESERVED_STAMP),
                 ONE_TARGET);
           }
           DatanodeCommand[] cmds = NameNodeAdapter.sendHeartBeat(nodeReg, dd,
@@ -106,7 +106,7 @@ public class TestHeartbeatHandling {
 
           ArrayList<Block> blockList = new ArrayList<Block>(MAX_INVALIDATE_BLOCKS);
           for (int i=0; i<MAX_INVALIDATE_BLOCKS; i++) {
-            blockList.add(new Block(i, 0, GenerationStamp.LAST_RESERVED_STAMP));
+            blockList.add(new SwappableBlock(i, 0, GenerationStamp.LAST_RESERVED_STAMP));
           }
           dd.addBlocksToBeInvalidated(blockList);
           cmds = NameNodeAdapter.sendHeartBeat(nodeReg, dd, namesystem)
@@ -191,7 +191,7 @@ public class TestHeartbeatHandling {
               dd2.getStorageInfos()[0],
               dd3.getStorageInfos()[0]};
           BlockInfo blockInfo = new BlockInfoContiguous(
-              new Block(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
+              new SwappableBlock(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
           blockInfo.convertToBlockUnderConstruction(BlockUCState.UNDER_RECOVERY,
               storages);
           dd1.addBlockToBeRecovered(blockInfo);
@@ -214,7 +214,7 @@ public class TestHeartbeatHandling {
           DFSTestUtil.resetLastUpdatesWithOffset(dd2, -40 * 1000);
           DFSTestUtil.resetLastUpdatesWithOffset(dd3, 0);
           blockInfo = new BlockInfoContiguous(
-              new Block(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
+              new SwappableBlock(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
           blockInfo.convertToBlockUnderConstruction(BlockUCState.UNDER_RECOVERY,
               storages);
           dd1.addBlockToBeRecovered(blockInfo);
@@ -236,7 +236,7 @@ public class TestHeartbeatHandling {
           DFSTestUtil.resetLastUpdatesWithOffset(dd2, - 40 * 1000);
           DFSTestUtil.resetLastUpdatesWithOffset(dd3, - 80 * 1000);
           blockInfo = new BlockInfoContiguous(
-              new Block(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
+              new SwappableBlock(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
           blockInfo.convertToBlockUnderConstruction(BlockUCState.UNDER_RECOVERY,
               storages);
           dd1.addBlockToBeRecovered(blockInfo);

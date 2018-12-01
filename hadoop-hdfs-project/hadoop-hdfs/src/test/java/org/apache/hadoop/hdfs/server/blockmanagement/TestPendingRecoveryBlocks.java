@@ -44,7 +44,7 @@ public class TestPendingRecoveryBlocks {
   }
 
   BlockInfo getBlock(long blockId) {
-    return new BlockInfoContiguous(new Block(blockId), (short) 0);
+    return new BlockInfoContiguous(new SwappableBlock(blockId), (short) 0);
   }
 
   @Test

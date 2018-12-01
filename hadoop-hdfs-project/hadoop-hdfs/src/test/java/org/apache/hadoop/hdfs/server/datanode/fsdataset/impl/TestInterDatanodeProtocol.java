@@ -34,6 +34,7 @@ import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeID;
@@ -240,7 +241,7 @@ public class TestInterDatanodeProtocol {
     String bpid = "BP-TEST";
     final Block[] blocks = new Block[5];
     for(int i = 0; i < blocks.length; i++) {
-      blocks[i] = new Block(firstblockid + i, length, gs);
+      blocks[i] = new HdfsBlock(firstblockid + i, length, gs);
       map.add(bpid, createReplicaInfo(blocks[i]));
     }
     
@@ -283,7 +284,7 @@ public class TestInterDatanodeProtocol {
 
     { // BlockRecoveryFI_01: replica not found
       final long recoveryid = gs + 1;
-      final Block b = new Block(firstblockid - 1, length, gs);
+      final Block b = new HdfsBlock(firstblockid - 1, length, gs);
       ReplicaRecoveryInfo r = FsDatasetImpl.initReplicaRecovery(bpid, map, b,
           recoveryid,
           DFSConfigKeys.DFS_DATANODE_XCEIVER_STOP_TIMEOUT_MILLIS_DEFAULT);
@@ -292,7 +293,7 @@ public class TestInterDatanodeProtocol {
     
     { // BlockRecoveryFI_02: "THIS IS NOT SUPPOSED TO HAPPEN" with recovery id < gs  
       final long recoveryid = gs - 1;
-      final Block b = new Block(firstblockid + 1, length, gs);
+      final Block b = new HdfsBlock(firstblockid + 1, length, gs);
       try {
         FsDatasetImpl.initReplicaRecovery(bpid, map, b, recoveryid,
             DFSConfigKeys.DFS_DATANODE_XCEIVER_STOP_TIMEOUT_MILLIS_DEFAULT);
@@ -306,7 +307,7 @@ public class TestInterDatanodeProtocol {
     // BlockRecoveryFI_03: Replica's gs is less than the block's gs
     {
       final long recoveryid = gs + 1;
-      final Block b = new Block(firstblockid, length, gs+1);
+      final Block b = new HdfsBlock(firstblockid, length, gs+1);
       try {
         FsDatasetImpl.initReplicaRecovery(bpid, map, b, recoveryid,
             DFSConfigKeys.DFS_DATANODE_XCEIVER_STOP_TIMEOUT_MILLIS_DEFAULT);

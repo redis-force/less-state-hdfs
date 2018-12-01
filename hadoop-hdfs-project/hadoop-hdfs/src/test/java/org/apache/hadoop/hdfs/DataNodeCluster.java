@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.StartupOption;
 import org.apache.hadoop.hdfs.server.datanode.SimulatedFSDataset;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
@@ -216,7 +217,7 @@ public class DataNodeCluster {
         long blkid = startingBlockId;
         for (int i_dn = 0; i_dn < numDataNodes; ++i_dn) {
           for (int i = 0; i < blocks.length; ++i) {
-            blocks[i] = new Block(blkid++, blockSize,
+            blocks[i] = new HdfsBlock(blkid++, blockSize,
                 CreateEditsLog.BLOCK_GENERATION_STAMP);
           }
           for (int i = 1; i <= replication; ++i) { 

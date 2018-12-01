@@ -154,11 +154,11 @@ public class TestSequentialBlockId {
     when(bid.getLegacyGenerationStampLimit())
         .thenReturn(maxGenStampForLegacyBlocks);
 
-    Block legacyBlock = spy(new Block());
+    Block legacyBlock = spy(new SwappableBlock());
     when(legacyBlock.getGenerationStamp())
         .thenReturn(maxGenStampForLegacyBlocks/2);
 
-    Block newBlock = spy(new Block());
+    Block newBlock = spy(new SwappableBlock());
     when(newBlock.getGenerationStamp())
         .thenReturn(maxGenStampForLegacyBlocks+1);
 

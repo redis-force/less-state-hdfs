@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsBlock;
 import org.apache.hadoop.hdfs.server.datanode.FinalizedReplica;
 import org.apache.hadoop.util.AutoCloseableLock;
 import org.junit.Before;
@@ -33,7 +34,7 @@ import org.junit.Test;
 public class TestReplicaMap {
   private final ReplicaMap map = new ReplicaMap(new AutoCloseableLock());
   private final String bpid = "BP-TEST";
-  private final  Block block = new Block(1234, 1234, 1234);
+  private final  Block block = new HdfsBlock(1234, 1234, 1234);
   
   @Before
   public void setup() {
@@ -55,7 +56,7 @@ public class TestReplicaMap {
     assertNotNull(map.get(bpid, block));
     
     // Test 3: Lookup failure - generation stamp mismatch 
-    Block b = new Block(block);
+    Block b = new HdfsBlock(block);
     b.setGenerationStamp(0);
     assertNull(map.get(bpid, b));
     
@@ -89,7 +90,7 @@ public class TestReplicaMap {
     } catch (IllegalArgumentException expected) { }
     
     // Test 2: remove failure - generation stamp mismatch 
-    Block b = new Block(block);
+    Block b = new HdfsBlock(block);
     b.setGenerationStamp(0);
     assertNull(map.remove(bpid, b));
     

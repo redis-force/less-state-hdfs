@@ -6,22 +6,17 @@ branches:
     - trying
     # Enable building pull requests.
     - master
-
-dist: xenial
 language: java
 sudo: false
-
 jdk:
-  - openjdk8
-
+  - oraclejdk8
 os:
   - linux
-
 cache:
  directories:
    - $HOME/.m2
-
 install: true
-
+before_install:
+  - sudo apt-get install -y protobuf-compiler
 script:
   - mvn package -Pdist -DskipTests=true -Dtar

@@ -42,7 +42,7 @@ public class TestBlockUnderConstructionFeature {
     dd2.setAlive(true);
     dd3.setAlive(true);
     BlockInfoContiguous blockInfo = new BlockInfoContiguous(
-        new Block(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
+        new SwappableBlock(0, 0, GenerationStamp.LAST_RESERVED_STAMP), (short) 3);
     blockInfo.convertToBlockUnderConstruction(BlockUCState.UNDER_CONSTRUCTION,
         new DatanodeStorageInfo[] {s1, s2, s3});
 
