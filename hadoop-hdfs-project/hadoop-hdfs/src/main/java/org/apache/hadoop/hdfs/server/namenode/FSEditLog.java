@@ -784,6 +784,7 @@ public class FSEditLog implements LogsPurgeable {
 
   public void logAppendFile(String path, INodeFile file, boolean newBlock,
       boolean toLogRpcIds) {
+    /*
     FileUnderConstructionFeature uc = file.getFileUnderConstructionFeature();
     assert uc != null;
     AppendOp op = AppendOp.getInstance(cache.get()).setPath(path)
@@ -792,6 +793,7 @@ public class FSEditLog implements LogsPurgeable {
         .setNewBlock(newBlock);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   /** 
@@ -800,6 +802,7 @@ public class FSEditLog implements LogsPurgeable {
    */
   public void logOpenFile(String path, INodeFile newNode, boolean overwrite,
       boolean toLogRpcIds) {
+    /*
     Preconditions.checkArgument(newNode.isUnderConstruction());
     PermissionStatus permissions = newNode.getPermissionStatus();
     AddOp op = AddOp.getInstance(cache.get())
@@ -830,12 +833,14 @@ public class FSEditLog implements LogsPurgeable {
 
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   /** 
    * Add close lease record to edit log.
    */
   public void logCloseFile(String path, INodeFile newNode) {
+    /*
     CloseOp op = CloseOp.getInstance(cache.get())
       .setPath(path)
       .setReplication(newNode.getFileReplication())
@@ -846,9 +851,11 @@ public class FSEditLog implements LogsPurgeable {
       .setPermissionStatus(newNode.getPermissionStatus());
     
     logEdit(op);
+    */
   }
   
   public void logAddBlock(String path, INodeFile file) {
+    /*
     Preconditions.checkArgument(file.isUnderConstruction());
     BlockInfo[] blocks = file.getBlocks();
     Preconditions.checkState(blocks != null && blocks.length > 0);
@@ -857,21 +864,25 @@ public class FSEditLog implements LogsPurgeable {
     AddBlockOp op = AddBlockOp.getInstance(cache.get()).setPath(path)
         .setPenultimateBlock(pBlock).setLastBlock(lastBlock);
     logEdit(op);
+    */
   }
   
   public void logUpdateBlocks(String path, INodeFile file, boolean toLogRpcIds) {
+    /*
     Preconditions.checkArgument(file.isUnderConstruction());
     UpdateBlocksOp op = UpdateBlocksOp.getInstance(cache.get())
       .setPath(path)
       .setBlocks(file.getBlocks());
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   /** 
    * Add create directory record to edit log
    */
   public void logMkDir(String path, INode newNode) {
+    /*
     PermissionStatus permissions = newNode.getPermissionStatus();
     MkdirOp op = MkdirOp.getInstance(cache.get())
       .setInodeId(newNode.getId())
@@ -889,6 +900,7 @@ public class FSEditLog implements LogsPurgeable {
       op.setXAttrs(x.getXAttrs());
     }
     logEdit(op);
+    */
   }
   
   /** 
@@ -898,12 +910,14 @@ public class FSEditLog implements LogsPurgeable {
    * TODO: use String parameters until just before writing to disk
    */
   void logRename(String src, String dst, long timestamp, boolean toLogRpcIds) {
+    /*
     RenameOldOp op = RenameOldOp.getInstance(cache.get())
       .setSource(src)
       .setDestination(dst)
       .setTimestamp(timestamp);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   /** 
@@ -913,6 +927,7 @@ public class FSEditLog implements LogsPurgeable {
    */
   void logRename(String src, String dst, long timestamp, boolean toLogRpcIds,
       Options.Rename... options) {
+    /*
     RenameOp op = RenameOp.getInstance(cache.get())
       .setSource(src)
       .setDestination(dst)
@@ -920,25 +935,30 @@ public class FSEditLog implements LogsPurgeable {
       .setOptions(options);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   /** 
    * Add set replication record to edit log
    */
   void logSetReplication(String src, short replication) {
+    /*
     SetReplicationOp op = SetReplicationOp.getInstance(cache.get())
       .setPath(src)
       .setReplication(replication);
     logEdit(op);
+    */
   }
 
   /** 
    * Add set storage policy id record to edit log
    */
   void logSetStoragePolicy(String src, byte policyId) {
+    /*
     SetStoragePolicyOp op = SetStoragePolicyOp.getInstance(cache.get())
         .setPath(src).setPolicyId(policyId);
     logEdit(op);
+    */
   }
 
   /** Add set namespace quota record to edit log
@@ -948,59 +968,71 @@ public class FSEditLog implements LogsPurgeable {
    * @param dsQuota diskspace quota
    */
   void logSetQuota(String src, long nsQuota, long dsQuota) {
+    /*
     SetQuotaOp op = SetQuotaOp.getInstance(cache.get())
       .setSource(src)
       .setNSQuota(nsQuota)
       .setDSQuota(dsQuota);
     logEdit(op);
+    */
   }
 
   /** Add set quota by storage type record to edit log */
   void logSetQuotaByStorageType(String src, long dsQuota, StorageType type) {
+    /*
     SetQuotaByStorageTypeOp op = SetQuotaByStorageTypeOp.getInstance(cache.get())
       .setSource(src)
       .setQuotaByStorageType(dsQuota, type);
     logEdit(op);
+    */
   }
 
   /**  Add set permissions record to edit log */
   void logSetPermissions(String src, FsPermission permissions) {
+    /*
     SetPermissionsOp op = SetPermissionsOp.getInstance(cache.get())
       .setSource(src)
       .setPermissions(permissions);
     logEdit(op);
+    */
   }
 
   /**  Add set owner record to edit log */
   void logSetOwner(String src, String username, String groupname) {
+    /*
     SetOwnerOp op = SetOwnerOp.getInstance(cache.get())
       .setSource(src)
       .setUser(username)
       .setGroup(groupname);
     logEdit(op);
+    */
   }
   
   /**
    * concat(trg,src..) log
    */
   void logConcat(String trg, String[] srcs, long timestamp, boolean toLogRpcIds) {
+    /*
     ConcatDeleteOp op = ConcatDeleteOp.getInstance(cache.get())
       .setTarget(trg)
       .setSources(srcs)
       .setTimestamp(timestamp);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   /** 
    * Add delete file record to edit log
    */
   void logDelete(String src, long timestamp, boolean toLogRpcIds) {
+    /*
     DeleteOp op = DeleteOp.getInstance(cache.get())
       .setPath(src)
       .setTimestamp(timestamp);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   /**
@@ -1008,6 +1040,7 @@ public class FSEditLog implements LogsPurgeable {
    */
   void logTruncate(String src, String clientName, String clientMachine,
                    long size, long timestamp, Block truncateBlock) {
+    /*
     TruncateOp op = TruncateOp.getInstance(cache.get())
       .setPath(src)
       .setClientName(clientName)
@@ -1016,44 +1049,53 @@ public class FSEditLog implements LogsPurgeable {
       .setTimestamp(timestamp)
       .setTruncateBlock(truncateBlock);
     logEdit(op);
+    */
   }
 
   /**
    * Add legacy block generation stamp record to edit log
    */
   void logLegacyGenerationStamp(long genstamp) {
+    /*
     SetGenstampV1Op op = SetGenstampV1Op.getInstance(cache.get())
         .setGenerationStamp(genstamp);
     logEdit(op);
+    */
   }
 
   /**
    * Add generation stamp record to edit log
    */
   void logGenerationStamp(long genstamp) {
+    /*
     SetGenstampV2Op op = SetGenstampV2Op.getInstance(cache.get())
         .setGenerationStamp(genstamp);
     logEdit(op);
+    */
   }
 
   /**
    * Record a newly allocated block ID in the edit log
    */
   void logAllocateBlockId(long blockId) {
+    /*
     AllocateBlockIdOp op = AllocateBlockIdOp.getInstance(cache.get())
       .setBlockId(blockId);
     logEdit(op);
+    */
   }
 
   /** 
    * Add access time record to edit log
    */
   void logTimes(String src, long mtime, long atime) {
+    /*
     TimesOp op = TimesOp.getInstance(cache.get())
       .setPath(src)
       .setModificationTime(mtime)
       .setAccessTime(atime);
     logEdit(op);
+    */
   }
 
   /** 
@@ -1061,6 +1103,7 @@ public class FSEditLog implements LogsPurgeable {
    */
   void logSymlink(String path, String value, long mtime, long atime,
       INodeSymlink node, boolean toLogRpcIds) {
+    /*
     SymlinkOp op = SymlinkOp.getInstance(cache.get())
       .setId(node.getId())
       .setPath(path)
@@ -1070,6 +1113,7 @@ public class FSEditLog implements LogsPurgeable {
       .setPermissionStatus(node.getPermissionStatus());
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   /**
@@ -1211,59 +1255,73 @@ public class FSEditLog implements LogsPurgeable {
   }
 
   void logSetAcl(String src, List<AclEntry> entries) {
+    /*
     final SetAclOp op = SetAclOp.getInstance(cache.get());
     op.src = src;
     op.aclEntries = entries;
     logEdit(op);
+    */
   }
   
   void logSetXAttrs(String src, List<XAttr> xAttrs, boolean toLogRpcIds) {
+    /*
     final SetXAttrOp op = SetXAttrOp.getInstance(cache.get());
     op.src = src;
     op.xAttrs = xAttrs;
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   
   void logRemoveXAttrs(String src, List<XAttr> xAttrs, boolean toLogRpcIds) {
+    /*
     final RemoveXAttrOp op = RemoveXAttrOp.getInstance(cache.get());
     op.src = src;
     op.xAttrs = xAttrs;
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   void logAddErasureCodingPolicy(ErasureCodingPolicy ecPolicy,
       boolean toLogRpcIds) {
+    /*
     AddErasureCodingPolicyOp op =
         AddErasureCodingPolicyOp.getInstance(cache.get());
     op.setErasureCodingPolicy(ecPolicy);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   void logEnableErasureCodingPolicy(String ecPolicyName, boolean toLogRpcIds) {
+    /*
     EnableErasureCodingPolicyOp op =
         EnableErasureCodingPolicyOp.getInstance(cache.get());
     op.setErasureCodingPolicy(ecPolicyName);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   void logDisableErasureCodingPolicy(String ecPolicyName, boolean toLogRpcIds) {
+    /*
     DisableErasureCodingPolicyOp op =
         DisableErasureCodingPolicyOp.getInstance(cache.get());
     op.setErasureCodingPolicy(ecPolicyName);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
 
   void logRemoveErasureCodingPolicy(String ecPolicyName, boolean toLogRpcIds) {
+    /*
     RemoveErasureCodingPolicyOp op =
         RemoveErasureCodingPolicyOp.getInstance(cache.get());
     op.setErasureCodingPolicy(ecPolicyName);
     logRpcIds(op, toLogRpcIds);
     logEdit(op);
+    */
   }
   /**
    * Get all the journals this edit log is currently operating on.

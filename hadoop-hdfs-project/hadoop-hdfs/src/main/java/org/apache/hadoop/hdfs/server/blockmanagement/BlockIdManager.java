@@ -77,8 +77,10 @@ public class BlockIdManager {
   public long upgradeLegacyGenerationStamp() {
     Preconditions.checkState(generationStamp.getCurrentValue() ==
       GenerationStamp.LAST_RESERVED_STAMP);
+    /*
     generationStamp.skipTo(legacyGenerationStamp.getCurrentValue() +
       HdfsServerConstants.RESERVED_LEGACY_GENERATION_STAMPS);
+      */
 
     legacyGenerationStampLimit = generationStamp.getCurrentValue();
     return generationStamp.getCurrentValue();
@@ -114,7 +116,7 @@ public class BlockIdManager {
    * the basis for allocating new block IDs.
    */
   public void setLastAllocatedContiguousBlockId(long blockId) {
-    blockIdGenerator.skipTo(blockId);
+    //blockIdGenerator.skipTo(blockId);
   }
 
   /**
@@ -130,7 +132,7 @@ public class BlockIdManager {
    * the basis for allocating new block IDs.
    */
   public void setLastAllocatedStripedBlockId(long blockId) {
-    blockGroupIdGenerator.skipTo(blockId);
+    //blockGroupIdGenerator.skipTo(blockId);
   }
 
   /**
@@ -145,7 +147,7 @@ public class BlockIdManager {
    * Sets the current generation stamp for legacy blocks
    */
   public void setLegacyGenerationStamp(long stamp) {
-    legacyGenerationStamp.setCurrentValue(stamp);
+    //legacyGenerationStamp.setCurrentValue(stamp);
   }
 
   /**
@@ -159,7 +161,7 @@ public class BlockIdManager {
    * Gets the current generation stamp for this filesystem
    */
   public void setGenerationStamp(long stamp) {
-    generationStamp.setCurrentValue(stamp);
+    //generationStamp.setCurrentValue(stamp);
   }
 
   public long getGenerationStamp() {
@@ -231,11 +233,11 @@ public class BlockIdManager {
   }
 
   void clear() {
-    legacyGenerationStamp.setCurrentValue(GenerationStamp.LAST_RESERVED_STAMP);
-    generationStamp.setCurrentValue(GenerationStamp.LAST_RESERVED_STAMP);
-    getBlockIdGenerator().setCurrentValue(SequentialBlockIdGenerator
-      .LAST_RESERVED_BLOCK_ID);
-    getBlockGroupIdGenerator().setCurrentValue(Long.MIN_VALUE);
+    //legacyGenerationStamp.setCurrentValue(GenerationStamp.LAST_RESERVED_STAMP);
+    //generationStamp.setCurrentValue(GenerationStamp.LAST_RESERVED_STAMP);
+    //getBlockIdGenerator().setCurrentValue(SequentialBlockIdGenerator
+    // .LAST_RESERVED_BLOCK_ID);
+    //getBlockGroupIdGenerator().setCurrentValue(Long.MIN_VALUE);
     legacyGenerationStampLimit = HdfsConstants.GRANDFATHER_GENERATION_STAMP;
   }
 

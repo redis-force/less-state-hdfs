@@ -748,6 +748,10 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
    */
   FSNamesystem(Configuration conf, FSImage fsImage, boolean ignoreRetryCache)
       throws IOException {
+    StateStore.init(conf.get("stateserver.endpoint", "192.168.195.31:8089"));
+    if (!INSTANCE.compareAndSet(null, this)) {
+        throw new RuntimeException("FSNamesystem is initialized multiple times");
+    }
     provider = DFSUtil.createKeyProviderCryptoExtension(conf);
     LOG.info("KeyProvider: " + provider);
     if (conf.getBoolean(DFS_NAMENODE_AUDIT_LOG_ASYNC_KEY,
@@ -906,10 +910,6 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
           DFSConfigKeys.DFS_NAMENODE_LIST_OPENFILES_NUM_RESPONSES +
               " must be a positive integer."
       );
-      if (!INSTANCE.compareAndSet(null, this)) {
-          throw new RuntimeException("FSNamesystem is initialized multiple times");
-      }
-      StateStore.init(conf.get("stateserver.endpoint", "192.168.195.31:8089"));
     } catch(IOException e) {
       LOG.error(getClass().getSimpleName() + " initialization failed.", e);
       close();

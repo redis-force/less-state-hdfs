@@ -276,7 +276,9 @@ public class INodeDirectory extends INodeWithAdditionalFields
   }
 
   public void setSnapshotQuota(int snapshotQuota) {
+    /*
     getDirectorySnapshottableFeature().setSnapshotQuota(snapshotQuota);
+    */
   }
 
   public Snapshot addSnapshot(int id, String name,

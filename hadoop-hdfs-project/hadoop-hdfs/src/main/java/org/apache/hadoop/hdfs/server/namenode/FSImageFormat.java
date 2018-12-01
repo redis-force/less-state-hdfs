@@ -29,13 +29,7 @@ import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -523,10 +517,14 @@ public class FSImageFormat {
       if (in.readShort() != 0) {
         throw new IOException("First node is not root");
       }
+      
+      /* HACKATHON: DO NOT LOAD FROM IMAGE */
+      /*
       final INodeDirectory root = loadINode(null, false, in, counter)
         .asDirectory();
       // update the root's attributes
       updateRootAttr(root);
+      */
     }
    
     /** Load children nodes for the parent directory. */
@@ -550,6 +548,9 @@ public class FSImageFormat {
         throws IOException {
       // Step 1. Identify the parent INode
       long inodeId = in.readLong();
+      /* HACKATHON DO NOT ACTUALLY LOAD INODE */
+      final INodeDirectory parent = null;
+      /*
       final INodeDirectory parent = this.namesystem.dir.getInode(inodeId)
           .asDirectory();
       
@@ -558,10 +559,12 @@ public class FSImageFormat {
       if (!toLoadSubtree) {
         return;
       }
+      */
 
       // Step 2. Load snapshots if parent is snapshottable
       int numSnapshots = in.readInt();
       if (numSnapshots >= 0) {
+        /* HACKATHON: THIS WILL NOT HAPPEN DURING DEMO */
         // load snapshots and snapshotQuota
         SnapshotFSImageFormat.loadSnapshotList(parent, numSnapshots, in, this);
         if (parent.getDirectorySnapshottableFeature().getSnapshotQuota() > 0) {
@@ -597,6 +600,7 @@ public class FSImageFormat {
    private int loadDirectory(DataInput in, Counter counter) throws IOException {
      String parentPath = FSImageSerialization.readString(in);
      // Rename .snapshot paths if we're doing an upgrade
+     /* HACKATHON DO NOT LOAD */
      parentPath = renameReservedPathsOnUpgrade(parentPath, getLayoutVersion());
      final INodeDirectory parent = INodeDirectory.valueOf(
          namesystem.dir.getINode(parentPath, DirOp.READ), parentPath);
@@ -638,7 +642,7 @@ public class FSImageFormat {
         continue;
       }
 
-      namesystem.dir.addToInodeMap(newNode);
+      // namesystem.dir.addToInodeMap(newNode);
       // check if the new inode belongs to the same parent
       if(!isParent(pathComponents, parentPath)) {
         parentINode = getParentINodeDirectory(pathComponents);
@@ -668,6 +672,9 @@ public class FSImageFormat {
    */
   private void addToParent(INodeDirectory parent, INode child)
       throws IllegalReservedPathException {
+    return;
+    /* HACKATHON: DO NOT DO THIS */
+    /*
     FSDirectory fsDir = namesystem.dir;
     if (parent == fsDir.rootDir) {
         child.setLocalName(renameReservedRootComponentOnUpgrade(
@@ -682,6 +689,7 @@ public class FSImageFormat {
     if (child.isFile()) {
       updateBlocksMap(child.asFile());
     }
+    */
   }
 
     public void updateBlocksMap(INodeFile file) {
@@ -713,7 +721,7 @@ public class FSImageFormat {
           renameReservedComponentOnUpgrade(localName, getLayoutVersion());
       INode inode = loadINode(localName, isSnapshotINode, in, counter);
       if (updateINodeMap) {
-        namesystem.dir.addToInodeMap(inode);
+        //namesystem.dir.addToInodeMap(inode);
       }
       return inode;
     }
@@ -791,7 +799,7 @@ public class FSImageFormat {
       }
 
       INodeFile file = new INodeFile(inodeId, localName, permissions,
-          modificationTime, atime, (BlockInfoContiguous[]) blocks,
+          modificationTime, atime, Optional.of((BlockInfoContiguous[]) blocks),
           replication, blockSize);
       if (underConstruction) {
         file.toUnderConstruction(clientName, clientMachine);
