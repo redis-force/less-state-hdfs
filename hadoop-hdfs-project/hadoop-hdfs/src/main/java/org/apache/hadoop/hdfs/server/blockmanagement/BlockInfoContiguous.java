@@ -36,6 +36,9 @@ public class BlockInfoContiguous extends BlockInfo {
     super(blk, size);
   }
 
+  public BlockInfoContiguous() {
+  }
+
   /**
    * Ensure that there is enough  space to include num more storages.
    * @return first free storage index.

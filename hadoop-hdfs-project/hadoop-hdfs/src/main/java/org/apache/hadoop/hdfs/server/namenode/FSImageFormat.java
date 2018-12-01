@@ -799,7 +799,7 @@ public class FSImageFormat {
       }
 
       INodeFile file = new INodeFile(inodeId, localName, permissions,
-          modificationTime, atime, Optional.of((BlockInfoContiguous[]) blocks),
+          modificationTime, atime, (BlockInfoContiguous[]) blocks,
           replication, blockSize);
       if (underConstruction) {
         file.toUnderConstruction(clientName, clientMachine);

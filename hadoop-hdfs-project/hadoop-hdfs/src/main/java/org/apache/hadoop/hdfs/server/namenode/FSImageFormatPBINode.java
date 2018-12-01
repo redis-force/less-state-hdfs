@@ -357,7 +357,7 @@ public final class FSImageFormatPBINode {
 
       final INodeFile file = new INodeFile(n.getId(),
           n.getName().toByteArray(), permissions, f.getModificationTime(),
-          f.getAccessTime(), Optional.of(blocks), replication, ecPolicyID,
+          f.getAccessTime(), blocks, replication, ecPolicyID,
           f.getPreferredBlockSize(), (byte)f.getStoragePolicyID(), blockType);
 
       if (f.hasAcl()) {

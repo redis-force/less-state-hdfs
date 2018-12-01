@@ -730,7 +730,7 @@ class FSDirWriteFileOp {
       Short replication, Byte ecPolicyID, long preferredBlockSize,
       byte storagePolicyId, BlockType blockType) {
     return new INodeFile(id, null, permissions, mtime, atime,
-        Optional.of(BlockInfo.EMPTY_ARRAY), replication, ecPolicyID, preferredBlockSize,
+        BlockInfo.EMPTY_ARRAY, replication, ecPolicyID, preferredBlockSize,
         storagePolicyId, blockType);
   }
 

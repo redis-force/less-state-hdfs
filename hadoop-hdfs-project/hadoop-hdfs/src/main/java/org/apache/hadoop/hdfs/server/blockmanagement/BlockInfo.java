@@ -54,12 +54,26 @@ public abstract class BlockInfo extends SwappableBlock
    */
   private long bcId;
 
+  private String blockPoolId;
+
+  public String getBlockPoolId() {
+    return blockPoolId;
+  }
+
+  public void setBlockPoolId(String blockPoolId) {
+    this.blockPoolId = blockPoolId;
+  }
+
+
   /** For implementing {@link LightWeightGSet.LinkedElement} interface. */
   private LightWeightGSet.LinkedElement nextLinkedElement;
 
 
   // Storages this block is replicated on
   protected DatanodeStorageInfo[] storages;
+
+  protected String datanodes[];
+  protected String storageIds[];
 
   private BlockUnderConstructionFeature uc;
 
@@ -71,7 +85,10 @@ public abstract class BlockInfo extends SwappableBlock
   public BlockInfo(short size) {
     this.storages = new DatanodeStorageInfo[size];
     this.bcId = INVALID_INODE_ID;
-    this.replication = isStriped() ? 0 : size;
+    this.replication = size;
+  }
+
+  public BlockInfo() {
   }
 
   public BlockInfo(Block blk, short size) {
@@ -168,6 +185,11 @@ public abstract class BlockInfo extends SwappableBlock
    *                      corresponding block group.
    */
   abstract boolean addStorage(DatanodeStorageInfo storage, Block reportedBlock);
+
+  public void resetStorages(String[] nodeId, String[] storageId) {
+    this.datanodes = nodeId;
+    this.storageIds = storageId;
+  }
 
   /**
    * Remove {@link DatanodeStorageInfo} location for a block

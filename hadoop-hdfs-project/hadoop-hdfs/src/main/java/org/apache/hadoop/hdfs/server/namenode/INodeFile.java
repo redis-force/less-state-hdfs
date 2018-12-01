@@ -245,25 +245,25 @@ public class INodeFile extends INodeWithAdditionalFields
 
   }
 
-  private Optional<BlockInfo[]> blocks;
+  private BlockInfo[] blocks;
   private boolean dirty = false;
 
   public INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
-            long atime, Optional<BlockInfo[]> blklist, short replication,
+            long atime, BlockInfo[] blklist, short replication,
             long preferredBlockSize) {
     this(id, name, permissions, mtime, atime, blklist, replication, null,
         preferredBlockSize, (byte) 0, CONTIGUOUS);
   }
 
   INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
-      long atime, Optional<BlockInfo[]> blklist, Short replication, Byte ecPolicyID,
+      long atime, BlockInfo[] blklist, Short replication, Byte ecPolicyID,
       long preferredBlockSize, byte storagePolicyID, BlockType blockType) {
     super(id, name, permissions, mtime, atime);
     final long layoutRedundancy = HeaderFormat.getBlockLayoutRedundancy(
         blockType, replication, ecPolicyID);
     this.setHeader(HeaderFormat.toLong(preferredBlockSize, layoutRedundancy,
         storagePolicyID));
-    BlockInfo[] realBlkList = blklist.orElse(BlockInfo.EMPTY_ARRAY);
+    BlockInfo[] realBlkList = BlockInfo.EMPTY_ARRAY;
     if (realBlkList.length > 0) {
       for (BlockInfo b : realBlkList) {
         Preconditions.checkArgument(b.getBlockType() == blockType);
@@ -433,7 +433,7 @@ public class INodeFile extends INodeWithAdditionalFields
     //copy to a new list
     BlockInfo[] newlist = new BlockInfo[size_1];
     System.arraycopy(realBlocks, 0, newlist, 0, size_1);
-    setBlocks(Optional.of(newlist));
+    setBlocks(newlist);
     lastBlock.delete();
     /* HACKATHON: delete last block meta */
     return lastBlock;
@@ -654,7 +654,7 @@ public class INodeFile extends INodeWithAdditionalFields
   @Override // BlockCollection
   public BlockInfo[] getBlocks() {
     /* HACKATHON: TODO load from state store */
-    return this.blocks.orElseGet(() -> BlockInfo.EMPTY_ARRAY);
+    return BlockMeta.convert(StateStore.get().getFile(getId()).blocks);
   }
 
   /** @return blocks of the file corresponding to the snapshot. */
@@ -699,7 +699,7 @@ public class INodeFile extends INodeWithAdditionalFields
       size += otherBlock.length;
     }
 
-    setBlocks(Optional.of(newlist));
+    setBlocks(newlist);
     thisBlocks = getBlocks();
     for(BlockInfo b : thisBlocks) {
       b.setBlockCollectionId(getId());
@@ -719,25 +719,25 @@ public class INodeFile extends INodeWithAdditionalFields
     /* HACKATHON: TODO Call addBlock instead of store everything again */
     BlockInfo[] thisBlocks = getBlocks();
     if (thisBlocks.length == 0) {
-      this.setBlocks(Optional.of(new BlockInfo[]{newblock}));
+      this.setBlocks(new BlockInfo[]{newblock});
     } else {
       int size = thisBlocks.length;
       BlockInfo[] newlist = new BlockInfo[size + 1];
       System.arraycopy(this.blocks, 0, newlist, 0, size);
       newlist[size] = newblock;
-      this.setBlocks(Optional.of(newlist));
+      this.setBlocks(newlist);
     }
   }
 
   /** Set the blocks. */
-  private void setBlocks(Optional<BlockInfo[]> blocks) {
+  private void setBlocks(BlockInfo[] blocks) {
     //this.blocks = (blocks != null ? blocks : BlockInfo.EMPTY_ARRAY);
     this.blocks = blocks;
   }
 
   /** Clear all blocks of the file. */
   public void clearBlocks() {
-    this.blocks = Optional.of(BlockInfo.EMPTY_ARRAY);
+    this.blocks = BlockInfo.EMPTY_ARRAY;
   }
 
   private void updateRemovedUnderConstructionFiles(
@@ -1168,7 +1168,7 @@ public class INodeFile extends INodeWithAdditionalFields
     }
     // set new blocks
     /* HACKATHON: TODO optimize this */
-    setBlocks(Optional.of(newBlocks));
+    setBlocks(newBlocks);
   }
 
   /**

@@ -47,7 +47,7 @@ public class INodeFileMeta extends INodeMeta {
 
   public static INodeFile convert(INodeMeta meta, PermissionStatus ps) {
     INodeFileMeta fileMeta = (INodeFileMeta) meta;
-    Optional<BlockInfo[]> blocks = fileMeta.blocks != EMPTY ? Optional.of(BlockMeta.convert(fileMeta.blocks)) : Optional.empty();
+    BlockInfo[] blocks = fileMeta.blocks != EMPTY ? BlockMeta.convert(fileMeta.blocks) : BlockInfo.EMPTY_ARRAY;
     INodeFile file = new INodeFile(meta.id,
         DFSUtil.string2Bytes(meta.name),
         ps,
