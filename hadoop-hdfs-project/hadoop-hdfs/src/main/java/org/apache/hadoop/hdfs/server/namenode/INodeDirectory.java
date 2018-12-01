@@ -506,7 +506,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   public List<INode> getChildren() {
     /*HACKATHON: TODO load from state store */
-    return null;
+    return INodeMeta.convert(StateStore.get().getDirectoryChildren(getId()));
   }
 
   /**

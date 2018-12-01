@@ -1140,6 +1140,7 @@ public class FSDirectory implements Closeable {
    */
   static void verifyQuota(INodesInPath iip, int pos, QuotaCounts deltas,
                           INode commonAncestor) throws QuotaExceededException {
+    /* HACKATHON REMOVED
     if (deltas.getNameSpace() <= 0 && deltas.getStorageSpace() <= 0
         && deltas.getTypeSpaces().allLessOrEqual(0L)) {
       // if quota is being freed or not being consumed
@@ -1163,6 +1164,7 @@ public class FSDirectory implements Closeable {
         }
       }
     }
+    */
   }
 
   /** Verify if the inode name is legal. */

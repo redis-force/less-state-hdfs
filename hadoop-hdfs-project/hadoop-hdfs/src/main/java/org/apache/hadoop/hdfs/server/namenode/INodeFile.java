@@ -432,7 +432,7 @@ public class INodeFile extends INodeWithAdditionalFields
     BlockInfo lastBlock = realBlocks[size_1];
     //copy to a new list
     BlockInfo[] newlist = new BlockInfo[size_1];
-    System.arraycopy(blocks, 0, newlist, 0, size_1);
+    System.arraycopy(realBlocks, 0, newlist, 0, size_1);
     setBlocks(Optional.of(newlist));
     lastBlock.delete();
     /* HACKATHON: delete last block meta */

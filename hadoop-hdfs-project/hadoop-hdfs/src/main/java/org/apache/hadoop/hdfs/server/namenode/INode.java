@@ -60,10 +60,11 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
   public static final Log LOG = LogFactory.getLog(INode.class);
 
   /** parent is either an {@link INodeDirectory} or an {@link INodeReference}.*/
-  private INode parent = null;
+  //private INode parent = null;
+  private long parentId = 0;
 
-  INode(INode parent) {
-    this.parent = parent;
+  INode(long parentId) {
+    this.parentId = parentId;
   }
 
   /** Get inode id */
@@ -233,13 +234,15 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
     }
     // if parent is a reference node, parent must be a renamed node. We can 
     // stop the check at the reference node.
-    if (parent != null && parent.isReference()) {
+    /*
+    if (parentId != 0 && parent.isReference()) {
+      return true;
+    }
+    */
+    if (parentId == 0) { // root
       return true;
     }
     final INodeDirectory parentDir = getParent();
-    if (parentDir == null) { // root
-      return true;
-    }
     if (!parentDir.isInLatestSnapshot(latestSnapshotId)) {
       return false;
     }
@@ -472,9 +475,11 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
    * Check and add namespace/storagespace/storagetype consumed to itself and the ancestors.
    */
   public void addSpaceConsumed(QuotaCounts counts) {
+    /*
     if (parent != null) {
       parent.addSpaceConsumed(counts);
     }
+    */
   }
 
   /**
@@ -635,8 +640,7 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
 
   /** @return the parent directory */
   public final INodeDirectory getParent() {
-    return parent == null? null
-        : parent.isReference()? getParentReference().getParent(): parent.asDirectory();
+    return parentId == 0 ? null : (INodeDirectory) StateStore.get().getDirectory(parentId).convert();
   }
 
   /**
@@ -644,18 +648,20 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
    *         otherwise, return null.
    */
   public INodeReference getParentReference() {
-    return parent == null || !parent.isReference()? null: (INodeReference)parent;
+    return null;
   }
 
   /** Set parent directory */
   public final void setParent(INodeDirectory parent) {
     /* HACKATHON: Do not store here, store it with meta data */
-    this.parent = parent;
+    if (parent != null) {
+      this.parentId = parent.getId();
+    }
   }
 
   /** Set container. */
   public final void setParentReference(INodeReference parent) {
-    this.parent = parent;
+    //this.parent = parent;
   }
 
   /** Clear references to other objects. */

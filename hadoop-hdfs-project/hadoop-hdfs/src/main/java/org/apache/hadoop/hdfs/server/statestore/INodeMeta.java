@@ -62,13 +62,32 @@ public class INodeMeta {
 
   public INodeWithAdditionalFields convert() {
     PermissionStatus ps = FSNamesystem.get().createFsOwnerPermissions(new FsPermission(INodeWithAdditionalFields.getFsPermissionShort(permission)));
-    switch (type) {
-      case INodeFileMeta.TYPE:
-        return INodeFileMeta.convert(this, ps);
-      case INodeDirectoryMeta.TYPE:
-        return INodeDirectoryMeta.convert(this, ps);
-      default:
-        throw new IllegalStateException("Unknown inode type:" + type);
+    if (this.getClass() == INodeMeta.class) {
+      switch (this.type) {
+        case INodeFileMeta.TYPE:
+          return StateStore.get().getFile(id).convert();
+        case INodeDirectoryMeta.TYPE:
+          return StateStore.get().getDirectory(id).convert();
+        default:
+          throw new IllegalStateException("Unknown inode type:" + type);
+      }
+    } else {
+      switch (type) {
+        case INodeFileMeta.TYPE:
+          return INodeFileMeta.convert(this, ps);
+        case INodeDirectoryMeta.TYPE:
+          return INodeDirectoryMeta.convert(this, ps);
+        default:
+          throw new IllegalStateException("Unknown inode type:" + type);
+      }
     }
+  }
+
+  public static List<INode> convert(INodeMeta[] meta) {
+    ArrayList<INode> result = new ArrayList(meta.length);
+    for (INodeMeta m : meta) {
+      result.add(m.convert());
+    }
+    return result;
   }
 }

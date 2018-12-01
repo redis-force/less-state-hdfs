@@ -31,8 +31,8 @@ public class KVStatStore extends StateStore {
       this(API_SERVER_HOST);
     }
 
-    class INodeChildren {
-        INodeMeta[] response;
+    public static class INodeChildren {
+        public INodeMeta[] response;
     }
 
     private <T> Object request(String url, String method, Object body, Class<T> valueType) throws IOException {
@@ -134,7 +134,7 @@ public class KVStatStore extends StateStore {
     
     public INodeMeta[] getDirectoryChildren(long directoryId) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/directory-children/").append(directoryId).append("/");
+        builder.append("/api/directory-children/").append(directoryId);
         try {
             INodeChildren children = (INodeChildren) request(builder.toString(), "GET", null, INodeChildren.class);
             return children.response;

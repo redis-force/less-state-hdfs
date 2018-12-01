@@ -291,6 +291,7 @@ public final class FSImageFormatPBINode {
     }
 
     private void addToParent(INodeDirectory parent, INode child) {
+      /* HACKATHON 
       if (parent == dir.rootDir && FSDirectory.isReservedName(child)) {
         throw new HadoopIllegalArgumentException("File name \""
             + child.getLocalName() + "\" is reserved. Please "
@@ -306,6 +307,7 @@ public final class FSImageFormatPBINode {
       if (child.isFile()) {
         updateBlocksMap(child.asFile(), fsn.getBlockManager());
       }
+      */
     }
 
     private INode loadINode(INodeSection.INode n) {

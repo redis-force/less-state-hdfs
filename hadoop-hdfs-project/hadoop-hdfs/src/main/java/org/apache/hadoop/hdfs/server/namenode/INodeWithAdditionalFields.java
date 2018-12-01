@@ -120,7 +120,7 @@ public abstract class INodeWithAdditionalFields extends INode
 
   private INodeWithAdditionalFields(INode parent, long id, byte[] name,
                                     long permission, long modificationTime, long accessTime) {
-    super(parent);
+    super(parent == null ? 0 : parent.getId());
     this.id = id;
     this.name = name;
     this.permission = permission;

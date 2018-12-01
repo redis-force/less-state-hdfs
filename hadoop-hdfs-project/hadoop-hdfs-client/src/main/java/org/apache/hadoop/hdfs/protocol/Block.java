@@ -112,7 +112,7 @@ public abstract class Block implements Writable, Comparable<Block> {
 
   public void set(long blkid, long len, long genStamp) {
     setBlockId(blkid);
-    setNumBytes(blkid);
+    setNumBytes(len);
     setGenerationStamp(genStamp);
   }
   /**

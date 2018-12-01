@@ -118,7 +118,7 @@ public abstract class INodeReference extends INode {
   private INode referred;
   
   public INodeReference(INode parent, INode referred) {
-    super(parent);
+    super(parent.getId());
     this.referred = referred;
   }
 
