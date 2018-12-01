@@ -15,6 +15,11 @@ import (
 	pb "github.com/redis-force/less-state-hdfs/pkg/proto"
 )
 
+const (
+	inodeFileType = iota
+	inodeDirectoryType
+)
+
 type apiServer struct {
 	proxy *Proxy
 }
@@ -239,6 +244,7 @@ func (s *apiServer) putINodeFile(c *gin.Context) {
 		return
 	}
 	nm.Id = id
+	nm.Type = inodeFileType
 	err = s.proxy.PutINodeFile(c.Request.Context(), nm)
 	if err != nil {
 		apiResponseError(c, http.StatusInternalServerError, err)
@@ -295,6 +301,7 @@ func (s *apiServer) putINodeDirectory(c *gin.Context) {
 		return
 	}
 	nm.Id = id
+	nm.Type = inodeDirectoryType
 	err = s.proxy.PutINodeDirectory(c.Request.Context(), nm)
 	if err != nil {
 		apiResponseError(c, http.StatusInternalServerError, err)
