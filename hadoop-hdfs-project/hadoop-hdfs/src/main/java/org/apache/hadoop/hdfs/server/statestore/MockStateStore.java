@@ -16,15 +16,15 @@ public class MockStateStore extends StateStore {
     return result;
   }
 
-  public INodeFileMeta createFile(long parent, long id, String name, long permission, long modificationTime, long accessTime, long header) {
+  public INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header) {
     return new INodeFileMeta(parent, id, name, permission, modificationTime, accessTime, header);
   }
 
-  public INodeDirectoryMeta mkdir(long parent, long id, String name, long permission, long modificationTime, long accessTime) {
+  public INodeDirectoryMeta mkdir(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime) {
     return new INodeDirectoryMeta(parent, id, name, permission, modificationTime, accessTime);
   }
 
-  public INodeMeta getDirectoryChild(long directoryId, String name) {
+  public INodeMeta getDirectoryChild(long directoryId, byte[] name) {
     return null;
   }
 

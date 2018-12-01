@@ -1,6 +1,7 @@
 package org.apache.hadoop.hdfs.server.statestore;
 
 import java.util.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class INodeMeta {
   public long id;
@@ -12,10 +13,10 @@ public class INodeMeta {
   public short type;
   public long parentId;
 
-  public INodeMeta(long parentId, long id, String name, long permission, long modificationTime, long accessTime, long header, short type) {
+  public INodeMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, short type) {
     this.parentId = parentId;
     this.id = id;
-    this.name = name;
+    this.name = new String(name, UTF_8);
     this.permission = permission;
     this.modificationTime = modificationTime;
     this.accessTime = accessTime;

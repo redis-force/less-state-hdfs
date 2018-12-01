@@ -4,11 +4,11 @@ public abstract class StateStore {
   public abstract long tso();
   public abstract long[] tso(int size);
 
-  public abstract INodeFileMeta createFile(long parent, long id, String name, long permission, long modificationTime, long accessTime, long header);
+  public abstract INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header);
 
-  public abstract INodeDirectoryMeta mkdir(long parent, long id, String name, long permission, long modificationTime, long accessTime);
+  public abstract INodeDirectoryMeta mkdir(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime);
 
-  public abstract INodeMeta getDirectoryChild(long directoryId, String name);
+  public abstract INodeMeta getDirectoryChild(long directoryId, byte[] name);
 
   public abstract INodeMeta[] getDirectoryChildren(long directoryId);
 

@@ -7,12 +7,12 @@ public class INodeFileMeta extends INodeMeta {
   public String clientName;
   public String clientMachine;
 
-  public INodeFileMeta(long parentId, long id, String name, long permission, long modificationTime, long accessTime, long header) {
+  public INodeFileMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header) {
     super(parentId, id, name, permission, modificationTime, accessTime, header, TYPE);
     this.blocks = EMPTY;
   }
 
-  public INodeFileMeta(long parentId, long id, String name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine) {
+  public INodeFileMeta(long parentId, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine) {
     this(parentId, id, name, permission, modificationTime, accessTime, header);
     this.clientName = clientName;
     this.clientMachine = clientMachine;
