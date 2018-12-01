@@ -3,6 +3,10 @@ package org.apache.hadoop.hdfs.server.statestore;
 import java.util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import org.apache.hadoop.hdfs.server.namenode.*;
+import org.apache.hadoop.hdfs.*;
+import org.apache.hadoop.fs.permission.*;
+
 public class INodeMeta {
   public long id;
   public String name;
@@ -37,6 +41,18 @@ public class INodeMeta {
       return Optional.of((INodeDirectoryMeta) this);
     } else {
       return Optional.empty();
+    }
+  }
+
+  public INodeWithAdditionalFields convert() {
+    PermissionStatus ps = FSNamesystem.get().createFsOwnerPermissions(new FsPermission(INodeWithAdditionalFields.getFsPermissionShort(permission)));
+    switch (type) {
+      case INodeFileMeta.TYPE:
+        return INodeFileMeta.convert(this, ps);
+      case INodeDirectoryMeta.TYPE:
+        return INodeDirectoryMeta.convert(this, ps);
+      default:
+        throw new IllegalStateException("Unknown inode type:" + type);
     }
   }
 }

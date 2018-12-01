@@ -111,9 +111,9 @@ public class FSDirectory implements Closeable {
     if (meta == null) {
       /* create */
       long permission = INodeWithAdditionalFields.getPermissionStatusLong(namesystem.createFsOwnerPermissions(new FsPermission((short) 0755)));
-      meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, "", permission, 0, 0);
+      meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, INodeDirectory.ROOT_NAME, permission, 0, 0);
     }
-    final INodeDirectory r = meta.convert(namesystem);
+    final INodeDirectory r = (INodeDirectory) meta.convert(namesystem);
     /*
     r.addDirectoryWithQuotaFeature(
         new DirectoryWithQuotaFeature.Builder().

@@ -26,11 +26,7 @@ import static org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot.NO_SNAPSH
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.StorageType;
@@ -250,25 +246,26 @@ public class INodeFile extends INodeWithAdditionalFields
 
   private long header = 0L;
 
-  private BlockInfo[] blocks;
+  private Optional<BlockInfo[]> blocks;
 
-  INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
-            long atime, BlockInfo[] blklist, short replication,
+  public INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
+            long atime, Optional<BlockInfo[]> blklist, short replication,
             long preferredBlockSize) {
     this(id, name, permissions, mtime, atime, blklist, replication, null,
         preferredBlockSize, (byte) 0, CONTIGUOUS);
   }
 
   INodeFile(long id, byte[] name, PermissionStatus permissions, long mtime,
-      long atime, BlockInfo[] blklist, Short replication, Byte ecPolicyID,
+      long atime, Optional<BlockInfo[]> blklist, Short replication, Byte ecPolicyID,
       long preferredBlockSize, byte storagePolicyID, BlockType blockType) {
     super(id, name, permissions, mtime, atime);
     final long layoutRedundancy = HeaderFormat.getBlockLayoutRedundancy(
         blockType, replication, ecPolicyID);
     header = HeaderFormat.toLong(preferredBlockSize, layoutRedundancy,
         storagePolicyID);
-    if (blklist != null && blklist.length > 0) {
-      for (BlockInfo b : blklist) {
+    BlockInfo[] realBlkList = blklist.orElse(BlockInfo.EMPTY_ARRAY);
+    if (realBlkList.length > 0) {
+      for (BlockInfo b : realBlkList) {
         Preconditions.checkArgument(b.getBlockType() == blockType);
       }
     }
@@ -349,8 +346,9 @@ public class INodeFile extends INodeWithAdditionalFields
   /** Assert all blocks are complete. */
   private void assertAllBlocksComplete(int numCommittedAllowed,
       short minReplication) {
-    for (int i = 0; i < blocks.length; i++) {
-      final String err = checkBlockComplete(blocks, i, numCommittedAllowed,
+    BlockInfo[] realBlocks = getBlocks();
+    for (int i = 0; i < realBlocks.length; i++) {
+      final String err = checkBlockComplete(realBlocks, i, numCommittedAllowed,
           minReplication);
       if(err != null) {
         throw new IllegalStateException(String.format("Unexpected block state: " +
@@ -392,7 +390,10 @@ public class INodeFile extends INodeWithAdditionalFields
   @Override // BlockCollection
   public void setBlock(int index, BlockInfo blk) {
     Preconditions.checkArgument(blk.isStriped() == this.isStriped());
+    /* HACKATHON: TODO store block data to state store */
+    /*
     this.blocks[index] = blk;
+    */
   }
 
   @Override // BlockCollection, the file should be under construction
@@ -419,20 +420,22 @@ public class INodeFile extends INodeWithAdditionalFields
   BlockInfo removeLastBlock(Block oldblock) {
     Preconditions.checkState(isUnderConstruction(),
         "file is no longer under construction");
-    if (blocks.length == 0) {
+    BlockInfo[] realBlocks = getBlocks();
+    if (realBlocks.length == 0) {
       return null;
     }
-    int size_1 = blocks.length - 1;
-    if (!blocks[size_1].equals(oldblock)) {
+    int size_1 = realBlocks.length - 1;
+    if (!realBlocks[size_1].equals(oldblock)) {
       return null;
     }
 
-    BlockInfo lastBlock = blocks[size_1];
+    BlockInfo lastBlock = realBlocks[size_1];
     //copy to a new list
     BlockInfo[] newlist = new BlockInfo[size_1];
     System.arraycopy(blocks, 0, newlist, 0, size_1);
-    setBlocks(newlist);
+    setBlocks(Optional.of(newlist));
     lastBlock.delete();
+    /* HACKATHON: delete last block meta */
     return lastBlock;
   }
 
@@ -650,7 +653,8 @@ public class INodeFile extends INodeWithAdditionalFields
   /** @return the blocks of the file. */
   @Override // BlockCollection
   public BlockInfo[] getBlocks() {
-    return this.blocks;
+    /* HACKATHON: TODO load from state store */
+    return this.blocks.orElseGet(() -> BlockInfo.EMPTY_ARRAY);
   }
 
   /** @return blocks of the file corresponding to the snapshot. */
@@ -675,24 +679,29 @@ public class INodeFile extends INodeWithAdditionalFields
    * append array of blocks to this.blocks
    */
   void concatBlocks(INodeFile[] inodes, BlockManager bm) {
-    int size = this.blocks.length;
+    BlockInfo[] thisBlocks = getBlocks();
+    int size = thisBlocks.length;
     int totalAddedBlocks = 0;
+    ArrayList<BlockInfo[]> otherBlocks = new ArrayList<BlockInfo[]>(inodes.length);
     for(INodeFile f : inodes) {
+      BlockInfo[] otherBlock = f.getBlocks();
+      otherBlocks.add(otherBlock);
       Preconditions.checkState(f.isStriped() == this.isStriped());
-      totalAddedBlocks += f.blocks.length;
+      totalAddedBlocks += otherBlock.length;
     }
     
     BlockInfo[] newlist =
         new BlockInfo[size + totalAddedBlocks];
-    System.arraycopy(this.blocks, 0, newlist, 0, size);
+    System.arraycopy(thisBlocks, 0, newlist, 0, size);
     
-    for(INodeFile in: inodes) {
-      System.arraycopy(in.blocks, 0, newlist, size, in.blocks.length);
-      size += in.blocks.length;
+    for(BlockInfo[] otherBlock : otherBlocks) {
+      System.arraycopy(otherBlock, 0, newlist, size, otherBlock.length);
+      size += otherBlock.length;
     }
 
-    setBlocks(newlist);
-    for(BlockInfo b : blocks) {
+    setBlocks(Optional.of(newlist));
+    thisBlocks = getBlocks();
+    for(BlockInfo b : thisBlocks) {
       b.setBlockCollectionId(getId());
       short oldRepl = b.getReplication();
       short repl = getPreferredBlockReplication();
@@ -707,25 +716,28 @@ public class INodeFile extends INodeWithAdditionalFields
    */
   void addBlock(BlockInfo newblock) {
     Preconditions.checkArgument(newblock.isStriped() == this.isStriped());
-    if (this.blocks.length == 0) {
-      this.setBlocks(new BlockInfo[]{newblock});
+    /* HACKATHON: TODO Call addBlock instead of store everything again */
+    BlockInfo[] thisBlocks = getBlocks();
+    if (thisBlocks.length == 0) {
+      this.setBlocks(Optional.of(new BlockInfo[]{newblock}));
     } else {
-      int size = this.blocks.length;
+      int size = thisBlocks.length;
       BlockInfo[] newlist = new BlockInfo[size + 1];
       System.arraycopy(this.blocks, 0, newlist, 0, size);
       newlist[size] = newblock;
-      this.setBlocks(newlist);
+      this.setBlocks(Optional.of(newlist));
     }
   }
 
   /** Set the blocks. */
-  private void setBlocks(BlockInfo[] blocks) {
-    this.blocks = (blocks != null ? blocks : BlockInfo.EMPTY_ARRAY);
+  private void setBlocks(Optional<BlockInfo[]> blocks) {
+    //this.blocks = (blocks != null ? blocks : BlockInfo.EMPTY_ARRAY);
+    this.blocks = blocks;
   }
 
   /** Clear all blocks of the file. */
   public void clearBlocks() {
-    this.blocks = BlockInfo.EMPTY_ARRAY;
+    this.blocks = Optional.of(BlockInfo.EMPTY_ARRAY);
   }
 
   private void updateRemovedUnderConstructionFiles(
@@ -779,8 +791,9 @@ public class INodeFile extends INodeWithAdditionalFields
   }
 
   public void clearFile(ReclaimContext reclaimContext) {
-    if (blocks != null && reclaimContext.collectedBlocks != null) {
-      for (BlockInfo blk : blocks) {
+    BlockInfo[] thisBlocks = getBlocks();
+    if (thisBlocks != null && reclaimContext.collectedBlocks != null) {
+      for (BlockInfo blk : thisBlocks) {
         reclaimContext.collectedBlocks.addDeleteBlock(blk);
       }
     }
@@ -929,12 +942,13 @@ public class INodeFile extends INodeWithAdditionalFields
    */
   public final long computeFileSize(boolean includesLastUcBlock,
       boolean usePreferredBlockSize4LastUcBlock) {
-    if (blocks.length == 0) {
+    BlockInfo[] thisBlocks = getBlocks();
+    if (thisBlocks.length == 0) {
       return 0;
     }
-    final int last = blocks.length - 1;
+    final int last = thisBlocks.length - 1;
     //check if the last block is BlockInfoUnderConstruction
-    BlockInfo lastBlk = blocks[last];
+    BlockInfo lastBlk = thisBlocks[last];
     long size = lastBlk.getNumBytes();
     if (!lastBlk.isComplete()) {
        if (!includesLastUcBlock) {
@@ -948,7 +962,7 @@ public class INodeFile extends INodeWithAdditionalFields
     }
     //sum other blocks
     for (int i = 0; i < last; i++) {
-      size += blocks[i].getNumBytes();
+      size += thisBlocks[i].getNumBytes();
     }
     return size;
   }
@@ -969,7 +983,8 @@ public class INodeFile extends INodeWithAdditionalFields
   // TODO: support EC with heterogeneous storage
   public final QuotaCounts storagespaceConsumedStriped() {
     QuotaCounts counts = new QuotaCounts.Builder().build();
-    for (BlockInfo b : blocks) {
+    BlockInfo[] thisBlocks = getBlocks();
+    for (BlockInfo b : thisBlocks) {
       Preconditions.checkState(b.isStriped());
       long blockSize = b.isComplete() ?
           ((BlockInfoStriped)b).spaceConsumed() : getPreferredBlockSize() *
@@ -1020,20 +1035,23 @@ public class INodeFile extends INodeWithAdditionalFields
    * Return the penultimate allocated block for this file.
    */
   BlockInfo getPenultimateBlock() {
-    if (blocks.length <= 1) {
+    BlockInfo[] thisBlocks = getBlocks();
+    if (thisBlocks.length <= 1) {
       return null;
     }
-    return blocks[blocks.length - 2];
+    return thisBlocks[thisBlocks.length - 2];
   }
 
   @Override
   public BlockInfo getLastBlock() {
-    return blocks.length == 0 ? null: blocks[blocks.length-1];
+    BlockInfo[] thisBlocks = getBlocks();
+    return thisBlocks.length == 0 ? null: thisBlocks[thisBlocks.length-1];
   }
 
   @Override
   public int numBlocks() {
-    return blocks.length;
+    /* HACKATHON: TODO optimize this */
+    return getBlocks().length;
   }
 
   @VisibleForTesting
@@ -1044,7 +1062,8 @@ public class INodeFile extends INodeWithAdditionalFields
     out.print(", fileSize=" + computeFileSize(snapshotId));
     // only compare the first block
     out.print(", blocks=");
-    out.print(blocks.length == 0 ? null: blocks[0]);
+    BlockInfo[] thisBlocks = getBlocks();
+    out.print(thisBlocks.length == 0 ? null: thisBlocks[0]);
     out.println();
   }
 
@@ -1148,7 +1167,8 @@ public class INodeFile extends INodeWithAdditionalFields
       System.arraycopy(getBlocks(), 0, newBlocks, 0, n);
     }
     // set new blocks
-    setBlocks(newBlocks);
+    /* HACKATHON: TODO optimize this */
+    setBlocks(Optional.of(newBlocks));
   }
 
   /**
@@ -1203,5 +1223,13 @@ public class INodeFile extends INodeWithAdditionalFields
         .findEarlierSnapshotBlocks(getDiffs().getLastSnapshotId());
     return snapshotBlocks != null &&
         Arrays.asList(snapshotBlocks).contains(block);
+  }
+
+  public static short getReplication(long header) {
+    return HeaderFormat.getReplication(header);
+  }
+
+  public static long getPreferredBlockSize(long header) {
+    return HeaderFormat.getPreferredBlockSize(header);
   }
 }

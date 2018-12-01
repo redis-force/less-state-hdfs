@@ -39,7 +39,7 @@ import org.apache.hadoop.hdfs.server.namenode.snapshot.DirectoryWithSnapshotFeat
 import org.apache.hadoop.hdfs.server.namenode.snapshot.DirectoryWithSnapshotFeature.DirectoryDiffList;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
 import org.apache.hadoop.hdfs.util.ReadOnlyList;
-import org.apache.hadoop.hdfs.server.statestore.StateStore;
+import org.apache.hadoop.hdfs.server.statestore.*;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -63,7 +63,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     if (!inode.isDirectory()) {
       throw new PathIsNotDirectoryException(DFSUtil.path2String(path));
     }
-    return inode.asDirectory(); 
+    return inode.asDirectory();
   }
 
   // Profiling shows that most of the file lists are between 1 and 4 elements.
@@ -72,14 +72,12 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   static final byte[] ROOT_NAME = DFSUtil.string2Bytes("");
 
-  private List<INode> children = null;
-  
   /** constructor */
   public INodeDirectory(long id, byte[] name, PermissionStatus permissions,
       long mtime) {
     super(id, name, permissions, mtime, 0L);
   }
-  
+
   /**
    * Copy constructor
    * @param other The INodeDirectory to be copied
@@ -91,9 +89,9 @@ public class INodeDirectory extends INodeWithAdditionalFields
   public INodeDirectory(INodeDirectory other, boolean adopt,
       Feature... featuresToCopy) {
     super(other);
-    this.children = other.children;
-    if (adopt && this.children != null) {
-      for (INode child : children) {
+
+    if (adopt) {
+      for (INode child : other.getChildren()) {
         child.setParent(this);
       }
     }
@@ -201,18 +199,20 @@ public class INodeDirectory extends INodeWithAdditionalFields
   }
 
   int searchChildren(byte[] name) {
-    return children == null? -1: Collections.binarySearch(children, name);
+    /* HACKATHON: TODO FIX THIS, implement at higher level */
+    List<INode> thisChildren = new ArrayList();
+    return thisChildren == null? -1: Collections.binarySearch(thisChildren, name);
   }
-  
+
   public DirectoryWithSnapshotFeature addSnapshotFeature(
       DirectoryDiffList diffs) {
-    Preconditions.checkState(!isWithSnapshot(), 
+    Preconditions.checkState(!isWithSnapshot(),
         "Directory is already with snapshot");
     DirectoryWithSnapshotFeature sf = new DirectoryWithSnapshotFeature(diffs);
     addFeature(sf);
     return sf;
   }
-  
+
   /**
    * If feature list contains a {@link DirectoryWithSnapshotFeature}, return it;
    * otherwise, return null.
@@ -230,17 +230,17 @@ public class INodeDirectory extends INodeWithAdditionalFields
     DirectoryWithSnapshotFeature sf = getDirectoryWithSnapshotFeature();
     return sf != null ? sf.getDiffs() : null;
   }
-  
+
   @Override
   public INodeDirectoryAttributes getSnapshotINode(int snapshotId) {
     DirectoryWithSnapshotFeature sf = getDirectoryWithSnapshotFeature();
     return sf == null ? this : sf.getDiffs().getSnapshotINode(snapshotId, this);
   }
-  
+
   @Override
   public String toDetailString() {
     DirectoryWithSnapshotFeature sf = this.getDirectoryWithSnapshotFeature();
-    return super.toDetailString() + (sf == null ? "" : ", " + sf.getDiffs()); 
+    return super.toDetailString() + (sf == null ? "" : ", " + sf.getDiffs());
   }
 
   public DirectorySnapshottableFeature getDirectorySnapshottableFeature() {
@@ -324,7 +324,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
   }
 
-  /** 
+  /**
    * Replace the given child with a new child. Note that we no longer need to
    * replace an normal INodeDirectory or INodeFile into an
    * INodeDirectoryWithSnapshot or INodeFileUnderConstruction. The only cases
@@ -332,6 +332,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
    */
   public void replaceChild(INode oldChild, final INode newChild,
       final INodeMap inodeMap) {
+    /* HACKATHON: THIS DOESN'T NEED TO BE IMPLEMENTED FOR THE DEMO */
+    /*
     Preconditions.checkNotNull(children);
     final int i = searchChildren(newChild.getLocalNameBytes());
     Preconditions.checkState(i >= 0);
@@ -339,29 +341,32 @@ public class INodeDirectory extends INodeWithAdditionalFields
         || oldChild == children.get(i).asReference().getReferredINode()
             .asReference().getReferredINode());
     oldChild = children.get(i);
-    
+
     if (oldChild.isReference() && newChild.isReference()) {
       // both are reference nodes, e.g., DstReference -> WithName
-      final INodeReference.WithCount withCount = 
+      final INodeReference.WithCount withCount =
           (WithCount) oldChild.asReference().getReferredINode();
       withCount.removeReference(oldChild.asReference());
     }
     children.set(i, newChild);
-    
+
     // replace the instance in the created list of the diff list
     DirectoryWithSnapshotFeature sf = this.getDirectoryWithSnapshotFeature();
     if (sf != null) {
       sf.getDiffs().replaceCreatedChild(oldChild, newChild);
     }
-    
+
     // update the inodeMap
     if (inodeMap != null) {
       inodeMap.put(newChild);
-    }    
+    }
+    */
   }
 
   INodeReference.WithName replaceChild4ReferenceWithName(INode oldChild,
       int latestSnapshotId) {
+    /* HACKATHON: THIS DOESN'T NEED TO BE IMPLEMENTED FOR THE DEMO */
+    /*
     Preconditions.checkArgument(latestSnapshotId != Snapshot.CURRENT_STATE_ID);
     if (oldChild instanceof INodeReference.WithName) {
       return (INodeReference.WithName)oldChild;
@@ -379,6 +384,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
         withCount, oldChild.getLocalNameBytes(), latestSnapshotId);
     replaceChild(oldChild, ref, null);
     return ref;
+    */
+    return null;
   }
 
   @Override
@@ -397,7 +404,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   /**
    * Save the child to the latest snapshot.
-   * 
+   *
    * @return the child inode, which may be replaced.
    */
   public INode saveChild2Snapshot(final INode child, final int latestSnapshotId,
@@ -405,7 +412,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     if (latestSnapshotId == Snapshot.CURRENT_STATE_ID) {
       return child;
     }
-    
+
     // add snapshot feature if necessary
     DirectoryWithSnapshotFeature sf = getDirectoryWithSnapshotFeature();
     if (sf == null) {
@@ -424,19 +431,21 @@ public class INodeDirectory extends INodeWithAdditionalFields
    */
   public INode getChild(byte[] name, int snapshotId) {
     DirectoryWithSnapshotFeature sf;
-    if (snapshotId == Snapshot.CURRENT_STATE_ID || 
+    if (snapshotId == Snapshot.CURRENT_STATE_ID ||
         (sf = getDirectoryWithSnapshotFeature()) == null) {
       /*
       ReadOnlyList<INode> c = getCurrentChildrenList();
       final int i = ReadOnlyList.Util.binarySearch(c, name);
       return i < 0 ? null : c.get(i);
       */
-      /* HACKATHON: load from state store */
       StateStore ss = StateStore.get();
-      ss.getDirectoryChild(getId(), name);
-      return null;
+      INodeMeta meta = ss.getDirectoryChild(getId(), name);
+      if (meta == null) {
+        return null;
+      }
+      return meta.convert();
     }
-    
+
     return sf.getChild(this, name, snapshotId);
   }
 
@@ -449,6 +458,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
    * corresponding snapshot diff list.
    */
   public int searchChild(INode inode) {
+    /* HACKATHON: THIS DOESN'T NEED TO BE IMPLEMENTED FOR THE DEMO */
+    /*
     INode child = getChild(inode.getLocalNameBytes(), Snapshot.CURRENT_STATE_ID);
     if (child != inode) {
       // inode is not in parent's children list, thus inode must be in
@@ -461,8 +472,10 @@ public class INodeDirectory extends INodeWithAdditionalFields
     } else {
       return Snapshot.CURRENT_STATE_ID;
     }
+    */
+    return Snapshot.CURRENT_STATE_ID;
   }
-  
+
   /**
    * @param snapshotId
    *          if it is not {@link Snapshot#CURRENT_STATE_ID}, get the result
@@ -480,10 +493,16 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
     return sf.getChildrenList(this, snapshotId);
   }
-  
+
   private ReadOnlyList<INode> getCurrentChildrenList() {
+    List<INode> children = getChildren();
     return children == null ? ReadOnlyList.Util.<INode> emptyList()
         : ReadOnlyList.Util.asReadOnlyList(children);
+  }
+
+  public List<INode> getChildren() {
+    /*HACKATHON: TODO load from state store */
+    return null;
   }
 
   /**
@@ -502,7 +521,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
     return -nextPos;
   }
-  
+
   /**
    * Remove the specified child from this directory.
    */
@@ -517,13 +536,13 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
     return removeChild(child);
   }
-  
-  /** 
+
+  /**
    * Remove the specified child from this directory.
    * The basic remove method which actually calls children.remove(..).
    *
    * @param child the child inode to be removed
-   * 
+   *
    * @return true if the child is removed; false if the child is not found.
    */
   public boolean removeChild(final INode child) {
@@ -532,19 +551,19 @@ public class INodeDirectory extends INodeWithAdditionalFields
       return false;
     }
 
-    final INode removed = children.remove(i);
-    Preconditions.checkState(removed == child);
+    /* HACKATHON: CHECK IMPLEMNENT DELETE */
+    StateStore.get().removeDirectoryChild(getId(), child.getLocalNameBytes());
     return true;
   }
 
   /**
    * Add a child inode to the directory.
-   * 
+   *
    * @param node INode to insert
    * @param setModTime set modification time for the parent node
-   *                   not needed when replaying the addition and 
+   *                   not needed when replaying the addition and
    *                   the parent already has the proper mod time
-   * @return false if the child with this name already exists; 
+   * @return false if the child with this name already exists;
    *         otherwise, return true;
    */
   public boolean addChild(INode node, final boolean setModTime,
@@ -584,11 +603,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
    * The basic add method which actually calls children.add(..).
    */
   private void addChild(final INode node, final int insertionPoint) {
-    if (children == null) {
-      children = new ArrayList<>(DEFAULT_FILES_PER_DIRECTORY);
-    }
+    /* HACKATHON: TODO flush changes in batch */
     node.setParent(this);
-    children.add(-insertionPoint - 1, node);
 
     if (node.getGroupName() == null) {
       node.setGroup(getGroupName());
@@ -616,7 +632,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
       counts.addNameSpace(1);
       return counts;
     }
-    
+
     // compute the quota usage in the scope of the current directory tree
     final DirectoryWithQuotaFeature q = getDirectoryWithQuotaFeature();
     if (useCache && q != null && q.isQuotaSet()) { // use the cached quota
@@ -631,6 +647,9 @@ public class INodeDirectory extends INodeWithAdditionalFields
   private QuotaCounts computeDirectoryQuotaUsage(BlockStoragePolicySuite bsps,
       byte blockStoragePolicyId, QuotaCounts counts, boolean useCache,
       int lastSnapshotId) {
+    /* HACKATHON: THIS DOESN'T NEED TO BE IMPLEMENTED FOR THE DEMO */
+    return null;
+    /*
     if (children != null) {
       for (INode child : children) {
         final byte childPolicyId = child.getStoragePolicyIDForQuota(
@@ -641,8 +660,9 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
     return computeQuotaUsage4CurrentDirectory(bsps, blockStoragePolicyId,
         counts);
+    */
   }
-  
+
   /** Add quota usage for this inode excluding children. */
   public QuotaCounts computeQuotaUsage4CurrentDirectory(
       BlockStoragePolicySuite bsps, byte storagePolicyId, QuotaCounts counts) {
@@ -717,29 +737,29 @@ public class INodeDirectory extends INodeWithAdditionalFields
     summary.yield();
     return summary;
   }
-  
+
   /**
    * This method is usually called by the undo section of rename.
-   * 
+   *
    * Before calling this function, in the rename operation, we replace the
    * original src node (of the rename operation) with a reference node (WithName
    * instance) in both the children list and a created list, delete the
    * reference node from the children list, and add it to the corresponding
    * deleted list.
-   * 
+   *
    * To undo the above operations, we have the following steps in particular:
-   * 
+   *
    * <pre>
-   * 1) remove the WithName node from the deleted list (if it exists) 
-   * 2) replace the WithName node in the created list with srcChild 
-   * 3) add srcChild back as a child of srcParent. Note that we already add 
+   * 1) remove the WithName node from the deleted list (if it exists)
+   * 2) replace the WithName node in the created list with srcChild
+   * 3) add srcChild back as a child of srcParent. Note that we already add
    * the node into the created list of a snapshot diff in step 2, we do not need
    * to add srcChild to the created list of the latest snapshot.
    * </pre>
-   * 
-   * We do not need to update quota usage because the old child is in the 
-   * deleted list before. 
-   * 
+   *
+   * We do not need to update quota usage because the old child is in the
+   * deleted list before.
+   *
    * @param oldChild
    *          The reference node to be removed/replaced
    * @param newChild
@@ -753,11 +773,11 @@ public class INodeDirectory extends INodeWithAdditionalFields
     sf.getDiffs().replaceCreatedChild(oldChild, newChild);
     addChild(newChild, true, Snapshot.CURRENT_STATE_ID);
   }
-  
+
   /**
    * Undo the rename operation for the dst tree, i.e., if the rename operation
    * (with OVERWRITE option) removes a file/dir from the dst tree, add it back
-   * and delete possible record in the deleted list.  
+   * and delete possible record in the deleted list.
    */
   public void undoRename4DstParent(final BlockStoragePolicySuite bsps,
       final INode deletedChild, int latestSnapshotId) {
@@ -774,15 +794,10 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
   }
 
-  /** Set the children list to null. */
-  public void clearChildren() {
-    this.children = null;
-  }
-
   @Override
   public void clear() {
     super.clear();
-    clearChildren();
+    StateStore.get().removeDirectory(getId());
   }
 
   /** Call cleanSubtree(..) recursively down the subtree. */
@@ -792,7 +807,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     // in case of deletion snapshot, since this call happens after we modify
     // the diff list, the snapshot to be deleted has been combined or renamed
     // to its latest previous snapshot. (besides, we also need to consider nodes
-    // created after prior but before snapshot. this will be done in 
+    // created after prior but before snapshot. this will be done in
     // DirectoryWithSnapshotFeature)
     int s = snapshot != Snapshot.CURRENT_STATE_ID
         && prior != Snapshot.NO_SNAPSHOT_ID ? prior : snapshot;
@@ -821,7 +836,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     clear();
     reclaimContext.removedINodes.add(this);
   }
-  
+
   @Override
   public void cleanSubtree(ReclaimContext reclaimContext, final int snapshotId,
       int priorSnapshotId) {
@@ -849,7 +864,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
       }
     }
   }
-  
+
   /**
    * Compare the metadata with another INodeDirectory
    */
@@ -861,10 +876,10 @@ public class INodeDirectory extends INodeWithAdditionalFields
         && getAclFeature() == other.getAclFeature()
         && getXAttrFeature() == other.getXAttrFeature();
   }
-  
+
   /*
    * The following code is to dump the tree recursively for testing.
-   * 
+   *
    *      \- foo   (INodeDirectory@33dd2717)
    *        \- sub1   (INodeDirectory@442172)
    *          +- file1   (INodeFile@78392d4)
@@ -873,7 +888,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
    *            \- file3   (INodeFile@78392d6)
    *          \- z_file4   (INodeFile@45848712)
    */
-  static final String DUMPTREE_EXCEPT_LAST_ITEM = "+-"; 
+  static final String DUMPTREE_EXCEPT_LAST_ITEM = "+-";
   static final String DUMPTREE_LAST_ITEM = "\\-";
   @VisibleForTesting
   @Override
@@ -896,7 +911,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
     }
     dumpTreeRecursively(out, prefix, new Iterable<SnapshotAndINode>() {
       final Iterator<INode> i = getChildrenList(snapshot).iterator();
-      
+
       @Override
       public Iterator<SnapshotAndINode> iterator() {
         return new Iterator<SnapshotAndINode>() {

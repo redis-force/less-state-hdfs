@@ -41,6 +41,7 @@ import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.server.namenode.INodeReference.DstReference;
 import org.apache.hadoop.hdfs.server.namenode.INodeReference.WithName;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
+import org.apache.hadoop.hdfs.server.statestore.*;
 import org.apache.hadoop.hdfs.util.Diff;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.util.ChunkedArrayList;
@@ -648,7 +649,9 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
 
   /** Set parent directory */
   public final void setParent(INodeDirectory parent) {
-    this.parent = parent;
+    /* HACKATHON: TODO store this to state store */
+    StateStore.get().setParent(parent.getId(), getParent().getId(), getId());
+    /* this.parent = parent */
   }
 
   /** Set container. */
