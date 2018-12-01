@@ -194,10 +194,10 @@ public class KVStatStore extends StateStore {
     }
 
     @Override
-    public BlockMeta[] updateBlocks(long fileId, BlockInfo[] blocks) {
+    public BlockMeta[] updateBlocks(long fileId, BlockMeta[] blocks) {
         BlockMeta[] blks = new BlockMeta[blocks.length];
         for (int i =0; i < blocks.length; i++) {
-            blks[i] = updateBlock(fileId,0, blocks[i]);
+            blks[i] = updateBlock(fileId, blocks[i]);
         }
         return  blks;
     }
@@ -215,9 +215,9 @@ public class KVStatStore extends StateStore {
     }
 
     @Override
-    public BlockMeta updateBlock(long fileId, int atIndex, BlockInfo block) {
+    public BlockMeta updateBlock(long fileId, BlockMeta block) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/file/").append(fileId).append("/").append(block.getBlockId());
+        builder.append("/api/file/").append(fileId).append("/").append(block.id);
         try {
             return (BlockMeta)request(builder.toString(), "PUT", block, BlockMeta.class);
         } catch (IOException e) {

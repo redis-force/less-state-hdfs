@@ -10,19 +10,18 @@ type APIResponse struct {
 //TS timestamp
 type TS struct {
 	Timestamp []uint64 `json:"timestamp"`
-	Count     int      `jons:"count"`
+	Count     int      `json:"count"`
 }
 
 //Block hdfs file block
 type Block struct {
-	ID   int64 `json:"id"`
-	Meta struct {
-		Generation   int64 `json:"generation"`
-		NumberBytes  int64 `json:"number_bytes"`
-		Replication  int16 `json:"replication"`
-		CollectionID int64 `json:"collection_id"`
-	} `json:"meta"`
-	Sotrage []BlockStorage `json:"storage"`
+	ID           int64          `json:"id"`
+	Generation   int64          `json:"generation"`
+	NumberBytes  int64          `json:"number_bytes"`
+	Replication  int16          `json:"replication"`
+	CollectionID int64          `json:"collection_id"`
+	BlockPoolID  string         `json:"block_pool_id"`
+	Storage      []BlockStorage `json:"storage"`
 }
 
 //BlockStorage hdfs file block storage
@@ -36,7 +35,7 @@ type INode struct {
 	ID               int64  `json:"id"`
 	Name             string `json:"name"`
 	Permission       int64  `json:"permission"`
-	ModificationTime int64  `json:"modifycation_time"`
+	ModificationTime int64  `json:"modification_time"`
 	AccessTime       int64  `json:"access_time"`
 	Header           int64  `json:"header"`
 	Type             int16  `json:"type"`
@@ -45,12 +44,30 @@ type INode struct {
 
 //INodeDirectory hdfs directory
 type INodeDirectory struct {
-	INode    INode   `json:"inode"`
-	Children []INode `json:"children"`
+	ID               int64   `json:"id"`
+	Name             string  `json:"name"`
+	Permission       int64   `json:"permission"`
+	ModificationTime int64   `json:"modification_time"`
+	AccessTime       int64   `json:"access_time"`
+	Header           int64   `json:"header"`
+	Type             int16   `json:"type"`
+	ParentID         int64   `json:"parent_id"`
+	Children         []INode `json:"children"`
 }
 
 //InodeFile hdfs file
-type InodeFile struct {
-	INode  INode   `json:"inode"`
-	Blocks []Block `json:"blocks"`
+type INodeFile struct {
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	Permission       int64  `json:"permission"`
+	ModificationTime int64  `json:"modification_time"`
+	AccessTime       int64  `json:"access_time"`
+	Header           int64  `json:"header"`
+	Type             int16  `json:"type"`
+	ParentID         int64  `json:"parent_id"`
+
+	ClientName    string `json:"client_name"`
+	ClientMachine string `json:"client_machine"`
+
+	Blocks []*Block `json:"blocks"`
 }

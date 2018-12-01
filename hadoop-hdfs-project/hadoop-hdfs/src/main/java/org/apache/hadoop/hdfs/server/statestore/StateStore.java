@@ -26,11 +26,11 @@ public abstract class StateStore {
 
   public abstract BlockMeta addBlock(long fileId, long blockId, long generationTimestamp);
 
-  public abstract BlockMeta[] updateBlocks(long fileId, BlockInfo[] blocks);
+  public abstract BlockMeta[] updateBlocks(long fileId, BlockMeta[] blocks);
 
   public abstract void truncateBlocks(long fileId, int size);
 
-  public abstract BlockMeta updateBlock(long fileId, int atIndex, BlockInfo block);
+  public abstract BlockMeta updateBlock(long fileId, BlockMeta block);
 
   public abstract void rename(long oldParentId, INodeMeta inode);
 
