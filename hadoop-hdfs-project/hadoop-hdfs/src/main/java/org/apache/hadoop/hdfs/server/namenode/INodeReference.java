@@ -742,4 +742,6 @@ public abstract class INodeReference extends INode {
       }
     }
   }
+
+  public void flush() {}
 }

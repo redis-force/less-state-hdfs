@@ -61,13 +61,7 @@ import org.apache.hadoop.util.ChunkedArrayList;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot.CURRENT_STATE_ID;
 import static org.apache.hadoop.util.Time.now;
@@ -735,7 +729,7 @@ class FSDirWriteFileOp {
       Short replication, Byte ecPolicyID, long preferredBlockSize,
       byte storagePolicyId, BlockType blockType) {
     return new INodeFile(id, null, permissions, mtime, atime,
-        BlockInfo.EMPTY_ARRAY, replication, ecPolicyID, preferredBlockSize,
+        Optional.of(BlockInfo.EMPTY_ARRAY), replication, ecPolicyID, preferredBlockSize,
         storagePolicyId, blockType);
   }
 

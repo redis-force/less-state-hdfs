@@ -22,6 +22,7 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.blockmanagement.SwappableBlock;
 import org.apache.hadoop.hdfs.server.namenode.INodeId;
 import org.apache.hadoop.util.SequentialNumber;
+import org.apache.hadoop.hdfs.server.statestore.*;
 
 /**
  * Generate the next valid block ID by incrementing the maximum block
@@ -33,7 +34,7 @@ import org.apache.hadoop.util.SequentialNumber;
  * and can be skipped over when detected.
  */
 @InterfaceAudience.Private
-public class SequentialBlockIdGenerator extends SequentialNumber {
+public class SequentialBlockIdGenerator {
   /**
    * The last reserved block ID.
    */
@@ -42,19 +43,31 @@ public class SequentialBlockIdGenerator extends SequentialNumber {
   private final BlockManager blockManager;
 
   SequentialBlockIdGenerator(BlockManager blockManagerRef) {
-    super(LAST_RESERVED_BLOCK_ID);
     this.blockManager = blockManagerRef;
   }
 
-  @Override // NumberGenerator
-  public long nextValue() {
-    Block b = new SwappableBlock(super.nextValue());
+  private long currentValue = 0;
 
+  private long doNextValue() {
+      currentValue = StateStore.get().tso();
+      return currentValue;
+  }
+
+  public long getCurrentValue() {
+    return currentValue;
+  }
+
+  public long nextValue() {
+    Block b = new SwappableBlock(doNextValue());
+
+    /* HACKATHON: we use tso so there is no need to detect conflicting
     // There may be an occasional conflict with randomly generated
     // block IDs. Skip over the conflicts.
     while(isValidBlock(b)) {
-      b.setBlockId(super.nextValue());
+      b.setBlockId(doNextValue());
     }
+    */
+
     if (b.getBlockId() < 0) {
       throw new IllegalStateException("All positive block IDs are used, " +
           "wrapping to negative IDs, " +

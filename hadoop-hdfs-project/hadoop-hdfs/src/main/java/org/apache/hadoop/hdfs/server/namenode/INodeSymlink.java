@@ -143,4 +143,6 @@ public class INodeSymlink extends INodeWithAdditionalFields {
     throw new UnsupportedOperationException(
         "Storage policy are not supported on symlinks");
   }
+
+  public void flush() {}
 }

@@ -127,6 +127,9 @@ public class INodeMap {
       public byte getLocalStoragePolicyID() {
         return HdfsConstants.BLOCK_STORAGE_POLICY_ID_UNSPECIFIED;
       }
+
+      public void flush() {
+      }
     };
       
     return map.get(inode);

@@ -18,6 +18,7 @@
 package org.apache.hadoop.hdfs.server.namenode;
 
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.util.Time;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
@@ -107,11 +108,16 @@ public class FSDirectory implements Closeable {
 
   private static INodeDirectory createRoot(FSNamesystem namesystem) {
     StateStore ss = StateStore.get();
-    INodeDirectoryMeta meta = ss.getDirectory(INodeId.ROOT_INODE_ID);
+    INodeDirectoryMeta meta = null;
+    try {
+      meta = ss.getDirectory(INodeId.ROOT_INODE_ID);
+    } catch (Exception ignored) {
+    }
     if (meta == null) {
       /* create */
       long permission = INodeWithAdditionalFields.getPermissionStatusLong(namesystem.createFsOwnerPermissions(new FsPermission((short) 0755)));
-      meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, INodeDirectory.ROOT_NAME, permission, 0, 0);
+      long now = Time.now();
+      meta = ss.mkdir(0, INodeId.ROOT_INODE_ID, INodeDirectory.ROOT_NAME, permission, now, now);
     }
     final INodeDirectory r = (INodeDirectory) meta.convert();
     /*

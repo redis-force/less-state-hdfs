@@ -19,12 +19,13 @@ package org.apache.hadoop.hdfs.server.common;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.util.SequentialNumber;
+import org.apache.hadoop.hdfs.server.statestore.*;
 
 /****************************************************************
  * A GenerationStamp is a Hadoop FS primitive, identified by a long.
  ****************************************************************/
 @InterfaceAudience.Private
-public class GenerationStamp extends SequentialNumber {
+public class GenerationStamp {
   /**
    * The last reserved generation stamp.
    */
@@ -34,6 +35,15 @@ public class GenerationStamp extends SequentialNumber {
    * Create a new instance, initialized to {@link #LAST_RESERVED_STAMP}.
    */
   public GenerationStamp() {
-    super(LAST_RESERVED_STAMP);
+  }
+
+  private long currentValue = 0;
+  public long nextValue() {
+    currentValue = StateStore.get().tso();
+    return currentValue;
+  }
+
+  public long getCurrentValue() {
+    return currentValue;
   }
 }

@@ -21,10 +21,7 @@ package org.apache.hadoop.hdfs.server.namenode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -358,7 +355,7 @@ public final class FSImageFormatPBINode {
 
       final INodeFile file = new INodeFile(n.getId(),
           n.getName().toByteArray(), permissions, f.getModificationTime(),
-          f.getAccessTime(), blocks, replication, ecPolicyID,
+          f.getAccessTime(), Optional.of(blocks), replication, ecPolicyID,
           f.getPreferredBlockSize(), (byte)f.getStoragePolicyID(), blockType);
 
       if (f.hasAcl()) {
