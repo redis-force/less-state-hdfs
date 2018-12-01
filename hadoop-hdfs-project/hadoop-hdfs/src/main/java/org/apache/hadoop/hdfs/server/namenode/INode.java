@@ -649,9 +649,8 @@ public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
 
   /** Set parent directory */
   public final void setParent(INodeDirectory parent) {
-    /* HACKATHON: TODO store this to state store */
-    StateStore.get().setParent(parent.getId(), getParent().getId(), getId());
-    /* this.parent = parent */
+    /* HACKATHON: Do not store here, store it with meta data */
+    this.parent = parent;
   }
 
   /** Set container. */

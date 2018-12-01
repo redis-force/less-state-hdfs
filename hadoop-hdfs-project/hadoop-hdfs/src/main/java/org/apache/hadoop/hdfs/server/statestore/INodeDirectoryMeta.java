@@ -17,9 +17,16 @@ public class INodeDirectoryMeta extends INodeMeta {
     this.children = EMPTY;
   }
 
+  public INodeDirectoryMeta() {
+  }
+
   public INodeDirectoryMeta(INodeDirectory directory, int flags) {
     super(directory, 0, TYPE);
     this.dirtyFlags = flags;
+  }
+
+  public INodeDirectoryMeta(INodeDirectory directory) {
+    this(directory, 0x7FFFFFFF);
   }
 
   public static INodeDirectory convert(INodeMeta meta, PermissionStatus ps) {

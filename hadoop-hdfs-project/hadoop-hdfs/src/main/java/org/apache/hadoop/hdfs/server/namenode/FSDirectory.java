@@ -1304,7 +1304,25 @@ public class FSDirectory implements Closeable {
     final QuotaCounts counts = inode.computeQuotaUsage(getBlockStoragePolicySuite());
     updateCount(existing, pos, counts, checkQuota);
 
-    boolean isRename = (inode.getParent() != null);
+    INodeDirectory oldParent = inode.getParent();
+    boolean isRename = (oldParent != null);
+    INodeMeta inodeMeta = null;
+    StateStore ss = StateStore.get();
+    inode.setParent(parent);
+    if (inode instanceof INodeFile) {
+      inodeMeta = new INodeFileMeta((INodeFile) inode);
+      ss.createFile((INodeFileMeta) inodeMeta);
+    } else if (inode instanceof INodeDirectory) {
+      inodeMeta = new INodeDirectoryMeta((INodeDirectory) inode);
+      ss.mkdir((INodeDirectoryMeta) inodeMeta);
+    }
+    if (!isRename && inode != null) {
+      if (inode instanceof INodeFile) {
+        ss.createFile((INodeFileMeta) inodeMeta);
+      } else if (inode instanceof INodeDirectory) {
+        ss.mkdir((INodeDirectoryMeta) inodeMeta);
+      }
+    }
     final boolean added = parent.addChild(inode, true,
         existing.getLatestSnapshotId());
     if (!added) {
@@ -1313,6 +1331,9 @@ public class FSDirectory implements Closeable {
     } else {
       if (!isRename) {
         copyINodeDefaultAcl(inode, modes);
+      } else if (inodeMeta != null) {
+        /* rename node */
+        StateStore.get().rename(oldParent.getId(), inodeMeta);
       }
       addToInodeMap(inode);
     }

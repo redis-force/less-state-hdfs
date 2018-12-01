@@ -6,9 +6,13 @@ public abstract class StateStore {
   public abstract long tso();
   public abstract long[] tso(int size);
 
-  public abstract INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header);
+  public abstract INodeFileMeta createFile(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime, long header, String clientName, String clientMachine);
+
+  public abstract INodeFileMeta createFile(INodeFileMeta meta);
 
   public abstract INodeDirectoryMeta mkdir(long parent, long id, byte[] name, long permission, long modificationTime, long accessTime);
+
+  public abstract INodeDirectoryMeta mkdir(INodeDirectoryMeta meta);
 
   public abstract INodeMeta getDirectoryChild(long directoryId, byte[] name);
 
@@ -28,7 +32,7 @@ public abstract class StateStore {
 
   public abstract BlockMeta updateBlock(long fileId, int atIndex, BlockInfo block);
 
-  public abstract void setParent(long newParentId, long oldParentId, long id);
+  public abstract void rename(long oldParentId, INodeMeta inode);
 
   public abstract void removeDirectoryChild(long directoryId, byte[] name);
 
