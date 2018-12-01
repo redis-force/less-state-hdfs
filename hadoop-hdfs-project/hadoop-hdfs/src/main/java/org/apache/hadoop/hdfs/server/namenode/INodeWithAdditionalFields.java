@@ -45,27 +45,29 @@ public abstract class INodeWithAdditionalFields extends INode
     }
 
     static String getUser(long permission) {
-      final int n = (int)USER.BITS.retrieve(permission);
+      final int n = (int) USER.BITS.retrieve(permission);
       return SerialNumberManager.INSTANCE.getUser(n);
     }
 
     static String getGroup(long permission) {
-      final int n = (int)GROUP.BITS.retrieve(permission);
+      final int n = (int) GROUP.BITS.retrieve(permission);
       return SerialNumberManager.INSTANCE.getGroup(n);
     }
-    
+
     static short getMode(long permission) {
-      return (short)MODE.BITS.retrieve(permission);
+      return (short) MODE.BITS.retrieve(permission);
     }
 
-    /** Encode the {@link PermissionStatus} to a long. */
+    /**
+     * Encode the {@link PermissionStatus} to a long.
+     */
     static long toLong(PermissionStatus ps) {
       long permission = 0L;
       final int user = SerialNumberManager.INSTANCE.getUserSerialNumber(
-          ps.getUserName());
+              ps.getUserName());
       permission = USER.BITS.combine(user, permission);
       final int group = SerialNumberManager.INSTANCE.getGroupSerialNumber(
-          ps.getGroupName());
+              ps.getGroupName());
       permission = GROUP.BITS.combine(group, permission);
       final int mode = ps.getPermission().toShort();
       permission = MODE.BITS.combine(mode, permission);
@@ -73,36 +75,51 @@ public abstract class INodeWithAdditionalFields extends INode
     }
   }
 
-  /** The inode id. */
+  /**
+   * The inode id.
+   */
   final private long id;
   /**
-   *  The inode name is in java UTF8 encoding; 
-   *  The name in HdfsFileStatus should keep the same encoding as this.
-   *  if this encoding is changed, implicitly getFileInfo and listStatus in
-   *  clientProtocol are changed; The decoding at the client
-   *  side should change accordingly.
+   * The inode name is in java UTF8 encoding;
+   * The name in HdfsFileStatus should keep the same encoding as this.
+   * if this encoding is changed, implicitly getFileInfo and listStatus in
+   * clientProtocol are changed; The decoding at the client
+   * side should change accordingly.
    */
   private byte[] name = null;
-  /** 
+  /**
    * Permission encoded using {@link PermissionStatusFormat}.
    * Codes other than {@link #clonePermissionStatus(INodeWithAdditionalFields)}
    * and {@link #updatePermissionStatus(PermissionStatusFormat, long)}
    * should not modify it.
    */
   private long permission = 0L;
-  /** The last modification time*/
+  /**
+   * The last modification time
+   */
   private long modificationTime = 0L;
-  /** The last access time*/
+  /**
+   * The last access time
+   */
   private long accessTime = 0L;
 
-  /** For implementing {@link LinkedElement}. */
+  /* HACKATHON: dirty hacked to make it simplier */
+  protected long header = 0L;
+
+  private boolean dirty = false;
+
+  /**
+   * For implementing {@link LinkedElement}.
+   */
   private LinkedElement next = null;
-  /** An array {@link Feature}s. */
+  /**
+   * An array {@link Feature}s.
+   */
   private static final Feature[] EMPTY_FEATURE = new Feature[0];
   protected Feature[] features = EMPTY_FEATURE;
 
   private INodeWithAdditionalFields(INode parent, long id, byte[] name,
-      long permission, long modificationTime, long accessTime) {
+                                    long permission, long modificationTime, long accessTime) {
     super(parent);
     this.id = id;
     this.name = name;
@@ -116,29 +133,33 @@ public abstract class INodeWithAdditionalFields extends INode
   }
 
   INodeWithAdditionalFields(long id, byte[] name, PermissionStatus permissions,
-      long modificationTime, long accessTime) {
+                            long modificationTime, long accessTime) {
     this(null, id, name, PermissionStatusFormat.toLong(permissions),
-        modificationTime, accessTime);
+            modificationTime, accessTime);
   }
-  
-  /** @param other Other node to be copied */
+
+  /**
+   * @param other Other node to be copied
+   */
   INodeWithAdditionalFields(INodeWithAdditionalFields other) {
     this(other.getParentReference() != null ? other.getParentReference()
-        : other.getParent(), other.getId(), other.getLocalNameBytes(),
-        other.permission, other.modificationTime, other.accessTime);
+                    : other.getParent(), other.getId(), other.getLocalNameBytes(),
+            other.permission, other.modificationTime, other.accessTime);
   }
 
   @Override
   public void setNext(LinkedElement next) {
     this.next = next;
   }
-  
+
   @Override
   public LinkedElement getNext() {
     return next;
   }
 
-  /** Get inode id */
+  /**
+   * Get inode id
+   */
   @Override
   public final long getId() {
     return this.id;
@@ -148,13 +169,15 @@ public abstract class INodeWithAdditionalFields extends INode
   public final byte[] getLocalNameBytes() {
     return name;
   }
-  
+
   @Override
   public final void setLocalName(byte[] name) {
     this.name = name;
   }
 
-  /** Clone the {@link PermissionStatus}. */
+  /**
+   * Clone the {@link PermissionStatus}.
+   */
   final void clonePermissionStatus(INodeWithAdditionalFields that) {
     this.permission = that.permission;
   }
@@ -162,7 +185,7 @@ public abstract class INodeWithAdditionalFields extends INode
   @Override
   final PermissionStatus getPermissionStatus(int snapshotId) {
     return new PermissionStatus(getUserName(snapshotId), getGroupName(snapshotId),
-        getFsPermission(snapshotId));
+            getFsPermission(snapshotId));
   }
 
   private final void updatePermissionStatus(PermissionStatusFormat f, long n) {
@@ -210,6 +233,7 @@ public abstract class INodeWithAdditionalFields extends INode
   public final short getFsPermissionShort() {
     return getFsPermissionShort(permission);
   }
+
   @Override
   void setPermission(FsPermission permission) {
     final short mode = permission.toShort();
@@ -242,7 +266,6 @@ public abstract class INodeWithAdditionalFields extends INode
 
     return this.modificationTime;
   }
-
 
   /** Update modification time if it is larger than the current value. */
   @Override
@@ -383,5 +406,14 @@ public abstract class INodeWithAdditionalFields extends INode
 
   public final Feature[] getFeatures() {
     return features;
+  }
+
+  protected boolean isDirty() {
+    return dirty;
+  }
+
+  protected void setHeader(long header) {
+    dirty = true;
+    this.header = header;
   }
 }

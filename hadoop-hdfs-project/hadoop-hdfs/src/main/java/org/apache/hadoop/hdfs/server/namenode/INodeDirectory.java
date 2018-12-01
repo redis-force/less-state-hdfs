@@ -72,6 +72,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   static final byte[] ROOT_NAME = DFSUtil.string2Bytes("");
 
+  private boolean dirty = false;
+
   /** constructor */
   public INodeDirectory(long id, byte[] name, PermissionStatus permissions,
       long mtime) {
@@ -970,5 +972,9 @@ public class INodeDirectory extends INodeWithAdditionalFields
 
   public final int getChildrenNum(final int snapshotId) {
     return getChildrenList(snapshotId).size();
+  }
+
+  public void flush() {
+    StateStore.get().update(new INodeDirectoryMeta(this, (super.isDirty() ? INodeFileMeta.DIRTY_META : 0) | (dirty ? INodeDirectoryMeta.DIRTY_CHILDREN : 0)));
   }
 }

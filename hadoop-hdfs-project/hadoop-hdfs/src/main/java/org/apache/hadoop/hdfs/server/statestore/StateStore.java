@@ -36,6 +36,9 @@ public abstract class StateStore {
 
   public abstract void removeFile(long fileId);
 
+  public abstract void update(INodeFileMeta meta);
+  public abstract void update(INodeDirectoryMeta meta);
+
   private static StateStore STORE = new MockStateStore();
 
   public static StateStore get() {
