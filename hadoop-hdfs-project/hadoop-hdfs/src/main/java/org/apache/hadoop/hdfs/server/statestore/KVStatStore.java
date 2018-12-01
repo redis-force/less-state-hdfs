@@ -183,7 +183,7 @@ public class KVStatStore extends StateStore {
 
     public BlockMeta addBlock(long fileId, long blockId, long generationTimestamp) {
         StringBuffer builder = new StringBuffer();
-        builder.append("/api/file/").append(fileId).append("/").append(blockId);
+        builder.append("/api/file/").append(fileId).append("/").append(blockId).append("?generation_time=").append(generationTimestamp);
         try {
             request(builder.toString(), "PUT", null, null);
         } catch (IOException e) {
@@ -195,17 +195,36 @@ public class KVStatStore extends StateStore {
 
     @Override
     public BlockMeta[] updateBlocks(long fileId, BlockInfo[] blocks) {
-        return new BlockMeta[0];
+        BlockMeta[] blks = new BlockMeta[blocks.length];
+        for (int i =0; i < blocks.length; i++) {
+            blks[i] = updateBlock(fileId,0, blocks[i]);
+        }
+        return  blks;
     }
 
     @Override
     public void truncateBlocks(long fileId, int size) {
-
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/file-truncate/").append(fileId).append("/").append(size);
+        try {
+            request(builder.toString(), "PUT", null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call add file block api error " + e.getMessage());
+        }
     }
 
     @Override
     public BlockMeta updateBlock(long fileId, int atIndex, BlockInfo block) {
-        return null;
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/file/").append(fileId).append("/").append(block.getBlockId());
+        try {
+            return (BlockMeta)request(builder.toString(), "PUT", block, BlockMeta.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call add file block api error " + e.getMessage());
+        }
+        return  null;
     }
 
     @Override
@@ -258,6 +277,14 @@ public class KVStatStore extends StateStore {
 
     @Override
     public void update(INodeFileMeta meta) {
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/file/").append(meta.id);
+        try {
+            request(builder.toString(), "POST", meta, APIResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call update file api error " + e.getMessage());
+        }
     }
 
     @Override
