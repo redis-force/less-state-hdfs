@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.PropertyNamingStrategy;
 
 import java.io.IOException;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class KVStatStore extends StateStore {
@@ -24,11 +25,11 @@ public class KVStatStore extends StateStore {
     private String endpoint;
 
     public KVStatStore(String endpoint) {
-      this.endpoint = endpoint;
+        this.endpoint = endpoint;
     }
 
     public KVStatStore() {
-      this(API_SERVER_HOST);
+        this(API_SERVER_HOST);
     }
 
     public static class INodeChildren {
@@ -43,7 +44,7 @@ public class KVStatStore extends StateStore {
                     PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES).writeValueAsBytes(body)));
         }
         HttpRequest request = builder.build();
-        HttpResponse response = httpClient.execute(HttpHost.create(endpoint),request);
+        HttpResponse response = httpClient.execute(HttpHost.create(endpoint), request);
         int statusCode = response.getStatusLine().getStatusCode();
         LOG.trace("request api " + url + " response code " + statusCode);
         if (statusCode == 404) {
@@ -131,7 +132,7 @@ public class KVStatStore extends StateStore {
             return null;
         }
     }
-    
+
     public INodeMeta[] getDirectoryChildren(long directoryId) {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/directory-children/").append(directoryId);
@@ -196,10 +197,10 @@ public class KVStatStore extends StateStore {
     @Override
     public BlockMeta[] updateBlocks(long fileId, BlockMeta[] blocks) {
         BlockMeta[] blks = new BlockMeta[blocks.length];
-        for (int i =0; i < blocks.length; i++) {
+        for (int i = 0; i < blocks.length; i++) {
             blks[i] = updateBlock(fileId, blocks[i]);
         }
-        return  blks;
+        return blks;
     }
 
     @Override
@@ -219,12 +220,12 @@ public class KVStatStore extends StateStore {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/file/").append(fileId).append("/").append(block.id);
         try {
-            return (BlockMeta)request(builder.toString(), "POST", block, BlockMeta.class);
+            return (BlockMeta) request(builder.toString(), "POST", block, BlockMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
             LOG.error("call add file block api error " + e.getMessage());
         }
-        return  null;
+        return null;
     }
 
     @Override
@@ -301,5 +302,18 @@ public class KVStatStore extends StateStore {
             e.printStackTrace();
             LOG.error("call update file api error " + e.getMessage());
         }
+    }
+
+    @Override
+    public BlockMeta getBlockMeta(long blockId) {
+        StringBuffer builder = new StringBuffer();
+        builder.append("/api/block/meta/").append(blockId);
+        try {
+            return (BlockMeta) request(builder.toString(), "PUT", null, BlockMeta.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error("call update file api error " + e.getMessage());
+        }
+        return null;
     }
 }

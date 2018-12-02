@@ -72,12 +72,20 @@ func (s *Proxy) del(ctx context.Context, keys ...[]byte) error {
 	return tx.Commit(ctx)
 }
 
-func (s *Proxy) GetBlock(ctx context.Context, id int64) (*pb.BlockMeta, error) {
-	m := new(pb.BlockMeta)
-	if err := s.get(ctx, generateBlockMetaKey(id), m); err != nil {
+func (s *Proxy) GetBlock(ctx context.Context, id int64) (*model.Block, error) {
+	tx, err := s.store.Begin()
+	if err != nil {
 		return nil, err
 	}
-	return m, nil
+	bm := new(pb.BlockMeta)
+	if err = s.transGet(ctx, tx, generateBlockMetaKey(id), bm); err != nil {
+		return nil, err
+	}
+	bs := new(pb.BlockStorage)
+	if err = s.transGet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
+		return nil, err
+	}
+	return pbBlockMetaToBlock(bm, bs), nil
 }
 
 func (s *Proxy) PutBlock(ctx context.Context, block *pb.BlockMeta) error {
@@ -96,8 +104,16 @@ func (s *Proxy) DeleteBlock(ctx context.Context, id int64) error {
 	return s.del(ctx, generateBlockMetaKey(id))
 }
 
-func (s *Proxy) GetBlockStorage(ctx context.Context, id int64) *pb.BlockStorage {
-	return nil
+func (s *Proxy) GetBlockStorage(ctx context.Context, id int64) (*pb.BlockStorage, error) {
+	tx, err := s.store.Begin()
+	if err != nil {
+		return nil, err
+	}
+	bs := new(pb.BlockStorage)
+	if err = s.transGet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
+		return nil, err
+	}
+	return bs, nil
 }
 func (s *Proxy) AddBlockStorage(ctx context.Context, id int64, nodeID, storageID string) error {
 	tx, err := s.store.Begin()
@@ -105,8 +121,12 @@ func (s *Proxy) AddBlockStorage(ctx context.Context, id int64, nodeID, storageID
 		return err
 	}
 	bs := new(pb.BlockStorage)
-	if err = s.transGet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
+	if err = s.transGet(ctx, tx, generateBlockStorageKey(id), bs); err != nil && !kv.ErrNotExist.Equal(err) {
 		return err
+	}
+	bs.Id = proto.Int64(id)
+	if len(bs.Nodes) == 0 {
+		bs.Nodes = make([]*pb.BlockStorageNode, 0)
 	}
 	for _, b := range bs.Nodes {
 		if b.GetDataNodeId() == nodeID && b.GetStorageId() == storageID {
@@ -120,7 +140,7 @@ func (s *Proxy) AddBlockStorage(ctx context.Context, id int64, nodeID, storageID
 	if err = s.transSet(ctx, tx, generateBlockStorageKey(id), bs); err != nil {
 		return err
 	}
-	return nil
+	return tx.Commit(ctx)
 }
 func (s *Proxy) DeleteBlockStorage(ctx context.Context, id int64) *pb.BlockStorage {
 	return nil
@@ -414,7 +434,32 @@ func (s *Proxy) updateINodeFileBlock(ctx context.Context, tx kv.Transaction, id,
 	if err := s.transSet(ctx, tx, generateBlockMetaKey(blockID), bm); err != nil {
 		return err
 	}
-	if err := s.transSet(ctx, tx, generateBlockStorageKey(blockID), bs); err != nil {
+
+	oldBs := new(pb.BlockStorage)
+	blockStorageKey := generateBlockStorageKey(blockID)
+	if err = s.transGet(ctx, tx, blockStorageKey, bs); err != nil && !kv.ErrNotExist.Equal(err) {
+		return err
+	}
+	oldBs.Id = proto.Int64(id)
+	if len(oldBs.Nodes) == 0 {
+		oldBs.Nodes = make([]*pb.BlockStorageNode, 0)
+	}
+	nodesLen := len(bs.Nodes)
+	for i := 0; i < nodesLen; i++ {
+		found := false
+		for _, bn := range bs.Nodes {
+			if bs.Nodes[i].GetDataNodeId() == bn.GetDataNodeId() && bs.Nodes[i].GetStorageId() == bn.GetStorageId() {
+				found = true
+			}
+		}
+		if !found {
+			oldBs.Nodes = append(oldBs.Nodes, &pb.BlockStorageNode{
+				StorageId:  proto.String(bs.Nodes[i].GetStorageId()),
+				DataNodeId: proto.String(bs.Nodes[i].GetDataNodeId()),
+			})
+		}
+	}
+	if err := s.transSet(ctx, tx, blockStorageKey, oldBs); err != nil {
 		return err
 	}
 	return nil

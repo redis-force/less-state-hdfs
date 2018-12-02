@@ -78,6 +78,24 @@ func modelINodeDirectoryToPbINodeDirectory(dir *model.INodeDirectory) (*pb.INode
 	return im, children
 }
 
+func pbBlockMetaToBlock(m *pb.BlockMeta, s *pb.BlockStorage) *model.Block {
+	bl := &model.Block{
+		ID:           m.GetId(),
+		Generation:   m.GetGeneration(),
+		Replication:  int16(m.GetReplication()),
+		CollectionID: m.GetCollectionId(),
+		BlockPoolID:  m.GetBlockPoolId(),
+	}
+	bl.Storage = make([]model.BlockStorage, len(s.GetNodes()))
+	for i, node := range s.GetNodes() {
+		bl.Storage[i] = model.BlockStorage{
+			DataNodeID: node.GetDataNodeId(),
+			StorageID:  node.GetStorageId(),
+		}
+	}
+	return bl
+}
+
 func pbINodeMetaToINode(m *pb.INodeMeta, n *model.INode) {
 	n.ID = m.GetId()
 	n.Name = m.GetName()

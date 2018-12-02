@@ -92,6 +92,7 @@ func newAPIServer(proxy *Proxy) *gin.Engine {
 			blockMeta.DELETE("/:id", server.deleteBlock)
 		}
 		blockStorage := api.Group("/block/storage")
+		blockStorage.Use(intCheck("id"))
 		{
 			blockStorage.GET("/:id", server.getBlockStorage)
 			blockStorage.PUT("/:id/:data_node_id/:storage_id", server.putBlockStorage)
@@ -235,8 +236,17 @@ func (s *apiServer) deleteBlock(c *gin.Context) {
 
 //getBlock param id
 func (s *apiServer) getBlockStorage(c *gin.Context) {
-	//TODO get block meta
-	apiResponseSuccess(c, nil)
+	id := c.GetInt64("id")
+	st, err := s.proxy.GetBlockStorage(c.Request.Context(), id)
+	if err != nil {
+		if kv.ErrNotExist.Equal(err) {
+			apiResponseError(c, http.StatusNotFound, err)
+			return
+		}
+		apiResponseError(c, http.StatusInternalServerError, err)
+		return
+	}
+	apiResponseSuccess(c, st)
 }
 
 //putBlock param id/data_node_id/storage_id
