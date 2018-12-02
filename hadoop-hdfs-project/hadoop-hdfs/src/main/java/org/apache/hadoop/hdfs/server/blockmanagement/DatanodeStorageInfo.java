@@ -335,7 +335,7 @@ public class DatanodeStorageInfo {
 
   @Override
   public String toString() {
-    return "[" + storageType + "]" + storageID + ":" + state + ":" + dn;
+    return "[" + storageType + "]" + storageID + ":" + state + ":" + dn + ":" + dn.getDatanodeUuid();
   }
   
   StorageReport toStorageReport() {

@@ -173,7 +173,7 @@ class FSDirStatAndListingOp {
       final ErasureCodingPolicy ecPolicy = FSDirErasureCodingOp.
           unprotectedGetErasureCodingPolicy(fsd.getFSNamesystem(), iip);
 
-      final LocatedBlocks blocks = bm.createLocatedBlocks(
+      final LocatedBlocks blocks = bm.createLocatedBlocks(inode.getId(),
           inode.getBlocks(iip.getPathSnapshotId()), fileSize, isUc, offset,
           length, needBlockToken, iip.isSnapshot(), feInfo, ecPolicy);
 
@@ -435,6 +435,7 @@ class FSDirStatAndListingOp {
         final long fileSize = !inSnapshot && isUc
             ? fileNode.computeFileSizeNotIncludingLastUcBlock() : size;
         loc = fsd.getBlockManager().createLocatedBlocks(
+            fileNode.getId(),
             fileNode.getBlocks(snapshot), fileSize, isUc, 0L, size,
             needBlockToken, inSnapshot, feInfo, ecPolicy);
         if (loc == null) {

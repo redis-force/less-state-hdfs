@@ -997,6 +997,7 @@ public class INodeFile extends INodeWithAdditionalFields
   public final QuotaCounts storagespaceConsumedContiguous(
       BlockStoragePolicy bsp) {
     QuotaCounts counts = new QuotaCounts.Builder().build();
+    /*
     final Iterable<BlockInfo> blocks;
     FileWithSnapshotFeature sf = getFileWithSnapshotFeature();
     if (sf == null) {
@@ -1028,6 +1029,7 @@ public class INodeFile extends INodeWithAdditionalFields
         }
       }
     }
+    */
     return counts;
   }
 

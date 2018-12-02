@@ -73,6 +73,12 @@ import java.util.concurrent.TimeUnit;
 public class DatanodeManager {
   static final Log LOG = LogFactory.getLog(DatanodeManager.class);
 
+  private static volatile DatanodeManager INSTANCE;
+
+  public static DatanodeManager get() {
+    return INSTANCE;
+  }
+
   private final Namesystem namesystem;
   private final BlockManager blockManager;
   private final DatanodeAdminManager datanodeAdminManager;
@@ -209,6 +215,9 @@ public class DatanodeManager {
 
   DatanodeManager(final BlockManager blockManager, final Namesystem namesystem,
       final Configuration conf) throws IOException {
+    synchronized (DatanodeManager.class) {
+      INSTANCE = this;
+    }
     this.namesystem = namesystem;
     this.blockManager = blockManager;
 

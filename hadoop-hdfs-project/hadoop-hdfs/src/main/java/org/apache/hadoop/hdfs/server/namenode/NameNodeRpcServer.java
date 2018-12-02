@@ -925,6 +925,7 @@ public class NameNodeRpcServer implements NamenodeProtocols {
                           ExtendedBlock last,  long fileId)
       throws IOException {
     checkNNStartup();
+    System.err.println("Extended block: " + last);
     return namesystem.completeFile(src, clientName, last, fileId);
   }
 

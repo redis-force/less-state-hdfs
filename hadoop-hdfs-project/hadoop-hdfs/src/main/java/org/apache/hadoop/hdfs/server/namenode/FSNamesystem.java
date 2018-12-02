@@ -748,7 +748,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
    */
   FSNamesystem(Configuration conf, FSImage fsImage, boolean ignoreRetryCache)
       throws IOException {
-    StateStore.init(conf.get("stateserver.endpoint", "192.168.195.31:8089"));
+    StateStore.init(conf.get("stateserver.endpoint", "127.0.0.1:8089"));
     if (!INSTANCE.compareAndSet(null, this)) {
         throw new RuntimeException("FSNamesystem is initialized multiple times");
     }
@@ -3467,10 +3467,10 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
 
   void commitOrCompleteLastBlock(
       final INodeFile fileINode, final INodesInPath iip,
-      final Block commitBlock) throws IOException {
+      final Block commitBlock, String blockPoolId) throws IOException {
     assert hasWriteLock();
     Preconditions.checkArgument(fileINode.isUnderConstruction());
-    blockManager.commitOrCompleteLastBlock(fileINode, commitBlock, iip);
+    blockManager.commitOrCompleteLastBlock(fileINode, commitBlock, iip, blockPoolId);
   }
 
   void addCommittedBlocksToPending(final INodeFile pendingFile) {
@@ -3700,12 +3700,12 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
 
       if (closeFile) {
         if(copyTruncate) {
-          closeFileCommitBlocks(src, iFile, truncatedBlock);
+          closeFileCommitBlocks(src, iFile, truncatedBlock, oldBlock.getBlockPoolId());
           if(!iFile.isBlockInLatestSnapshot(storedBlock)) {
             blockManager.removeBlock(storedBlock);
           }
         } else {
-          closeFileCommitBlocks(src, iFile, storedBlock);
+          closeFileCommitBlocks(src, iFile, storedBlock, oldBlock.getBlockPoolId());
         }
       } else {
         // If this commit does not want to close the file, persist blocks
@@ -3735,11 +3735,11 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
    */
   @VisibleForTesting
   void closeFileCommitBlocks(String src, INodeFile pendingFile,
-      BlockInfo storedBlock) throws IOException {
+      BlockInfo storedBlock, String blockPoolId) throws IOException {
     final INodesInPath iip = INodesInPath.fromINode(pendingFile);
 
     // commit the last block and complete it if it has minimum replicas
-    commitOrCompleteLastBlock(pendingFile, iip, storedBlock);
+    commitOrCompleteLastBlock(pendingFile, iip, storedBlock, blockPoolId);
 
     //remove lease, close file
     int s = Snapshot.findLatestSnapshot(pendingFile, Snapshot.CURRENT_STATE_ID);
@@ -3946,6 +3946,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     assert hasWriteLock();
     // file is closed
     getEditLog().logCloseFile(path, file);
+    StateStore.get().createFile(new INodeFileMeta(file));
     NameNode.stateChangeLog.debug("closeFile: {} with {} blocks is persisted" +
         " to the file system", path, file.getBlocks().length);
   }

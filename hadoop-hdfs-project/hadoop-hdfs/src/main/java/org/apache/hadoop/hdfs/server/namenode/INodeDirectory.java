@@ -572,6 +572,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
    */
   public boolean addChild(INode node, final boolean setModTime,
       final int latestSnapshotId) {
+    return true;
+    /*
     final int low = searchChildren(node.getLocalNameBytes());
     if (low >= 0) {
       return false;
@@ -591,14 +593,17 @@ public class INodeDirectory extends INodeWithAdditionalFields
       updateModificationTime(node.getModificationTime(), latestSnapshotId);
     }
     return true;
+    */
   }
 
   public boolean addChild(INode node) {
+    /*
     final int low = searchChildren(node.getLocalNameBytes());
     if (low >= 0) {
       return false;
     }
     addChild(node, low);
+    */
     return true;
   }
 

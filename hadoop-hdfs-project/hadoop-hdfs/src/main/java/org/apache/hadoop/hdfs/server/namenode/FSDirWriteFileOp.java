@@ -54,6 +54,7 @@ import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 import org.apache.hadoop.hdfs.server.namenode.FSDirectory.DirOp;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
+import org.apache.hadoop.hdfs.server.statestore.*;
 import org.apache.hadoop.io.erasurecode.ErasureCodeConstants;
 import org.apache.hadoop.net.Node;
 import org.apache.hadoop.net.NodeBase;
@@ -245,7 +246,7 @@ class FSDirWriteFileOp {
 
     // commit the last block and complete it if it has minimum replicas
     fsn.commitOrCompleteLastBlock(pendingFile, fileState.iip,
-                                  ExtendedBlock.getLocalBlock(previous));
+                                  ExtendedBlock.getLocalBlock(previous), previous != null ? previous.getBlockPoolId() : fsn.getBlockPoolId());
 
     // allocate new block, record block locations in INode.
     final BlockType blockType = pendingFile.getBlockType();
@@ -254,7 +255,7 @@ class FSDirWriteFileOp {
     INodesInPath inodesInPath = INodesInPath.fromINode(pendingFile);
     saveAllocatedBlock(fsn, src, inodesInPath, newBlock, targets, blockType);
 
-    persistNewBlock(fsn, src, pendingFile);
+    persistNewBlock(fsn, src, pendingFile, newBlock);
     offset = pendingFile.computeFileSize();
 
     // Return located block
@@ -671,12 +672,12 @@ class FSDirWriteFileOp {
     checkBlock(fsn, last);
     INodesInPath iip = fsn.dir.resolvePath(pc, src, fileId);
     return completeFileInternal(fsn, iip, holder,
-        ExtendedBlock.getLocalBlock(last), fileId);
+        ExtendedBlock.getLocalBlock(last), fileId, last != null ? last.getBlockPoolId() : fsn.getBlockPoolId());
   }
 
   private static boolean completeFileInternal(
       FSNamesystem fsn, INodesInPath iip,
-      String holder, Block last, long fileId)
+      String holder, Block last, long fileId, String blockPoolId)
       throws IOException {
     assert fsn.hasWriteLock();
     final String src = iip.getPath();
@@ -712,9 +713,10 @@ class FSDirWriteFileOp {
     }
 
     // commit the last block and complete it if it has minimum replicas
-    fsn.commitOrCompleteLastBlock(pendingFile, iip, last);
+    fsn.commitOrCompleteLastBlock(pendingFile, iip, last, blockPoolId);
 
     if (!fsn.checkFileProgress(src, pendingFile, true)) {
+      System.err.println("checkFileProgress return false");
       return false;
     }
 
@@ -745,8 +747,9 @@ class FSDirWriteFileOp {
    * Persist the new block (the last block of the given file).
    */
   private static void persistNewBlock(
-      FSNamesystem fsn, String path, INodeFile file) {
+      FSNamesystem fsn, String path, INodeFile file, Block newBlock) {
     Preconditions.checkArgument(file.isUnderConstruction());
+    StateStore.get().addBlock(file.getId(), newBlock.getBlockId(), newBlock.getGenerationStamp());
     fsn.getEditLog().logAddBlock(path, file);
     if (NameNode.stateChangeLog.isDebugEnabled()) {
       NameNode.stateChangeLog.debug("persistNewBlock: "

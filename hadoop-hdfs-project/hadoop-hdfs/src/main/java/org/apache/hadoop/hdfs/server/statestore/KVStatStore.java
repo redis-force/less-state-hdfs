@@ -217,6 +217,7 @@ public class KVStatStore extends StateStore {
 
     @Override
     public BlockMeta updateBlock(long fileId, BlockMeta block) {
+        System.err.println("updateBlock");
         StringBuffer builder = new StringBuffer();
         builder.append("/api/file/").append(fileId).append("/").append(block.id);
         try {
@@ -309,7 +310,7 @@ public class KVStatStore extends StateStore {
         StringBuffer builder = new StringBuffer();
         builder.append("/api/block/meta/").append(blockId);
         try {
-            return (BlockMeta) request(builder.toString(), "PUT", null, BlockMeta.class);
+            return (BlockMeta) request(builder.toString(), "GET", null, BlockMeta.class);
         } catch (IOException e) {
             e.printStackTrace();
             LOG.error("call update file api error " + e.getMessage());

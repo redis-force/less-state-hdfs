@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -71,9 +69,6 @@ public abstract class BlockInfo extends SwappableBlock
 
   // Storages this block is replicated on
   protected DatanodeStorageInfo[] storages;
-
-  protected String datanodes[];
-  protected String storageIds[];
 
   private BlockUnderConstructionFeature uc;
 
@@ -187,8 +182,27 @@ public abstract class BlockInfo extends SwappableBlock
   abstract boolean addStorage(DatanodeStorageInfo storage, Block reportedBlock);
 
   public void resetStorages(String[] nodeId, String[] storageId) {
-    this.datanodes = nodeId;
-    this.storageIds = storageId;
+    DatanodeManager dm = DatanodeManager.get();
+    storages = new DatanodeStorageInfo[nodeId.length];
+    int sidx = 0;
+    for (int idx = 0, size = nodeId.length; idx < size; ++idx) {
+      String ni = nodeId[idx];
+      String si = storageId[idx];
+      DatanodeDescriptor dn = dm.getDatanode(ni);
+      if (dn == null) {
+        continue;
+      }
+      DatanodeStorageInfo ds = dn.getStorageInfo(si);
+      if (ds == null) {
+        continue;
+      }
+      storages[sidx++] = ds;
+    }
+    if (sidx != storages.length) {
+      DatanodeStorageInfo[] newStorages = new DatanodeStorageInfo[sidx];
+      System.arraycopy(storages, 0, newStorages, 0, sidx);
+      storages = newStorages;
+    }
   }
 
   /**
@@ -322,11 +336,12 @@ public abstract class BlockInfo extends SwappableBlock
    */
   public List<ReplicaUnderConstruction> setGenerationStampAndVerifyReplicas(
       long genStamp) {
-    Preconditions.checkState(uc != null && !isComplete());
+    // Preconditions.checkState(uc != null && !isComplete());
     // Set the generation stamp for the block.
     setGenerationStamp(genStamp);
 
-    return uc.getStaleReplicas(genStamp);
+    //return uc.getStaleReplicas(genStamp);
+    return new ArrayList(0);
   }
 
   /**
@@ -341,8 +356,10 @@ public abstract class BlockInfo extends SwappableBlock
       throw new IOException("Trying to commit inconsistent block: id = "
           + block.getBlockId() + ", expected id = " + getBlockId());
     }
+    /*
     Preconditions.checkState(!isComplete());
     uc.commit();
+    */
     this.setNumBytes(block.getNumBytes());
     // Sort out invalid replicas.
     return setGenerationStampAndVerifyReplicas(block.getGenerationStamp());
